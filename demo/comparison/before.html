@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NovaWriter - Supercharge Your Writing with AI</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: Inter, "PingFang SC", "Microsoft YaHei", sans-serif; background: #f8f7ff; color: #1e1b33; }
+  .nav { display: flex; justify-content: space-between; align-items: center; padding: 18px 48px; background: rgba(255,255,255,.8); backdrop-filter: blur(10px); position: sticky; top: 0; box-shadow: 0 2px 12px rgba(99,102,241,.08); }
+  .logo { font-size: 20px; font-weight: 800; background: linear-gradient(135deg, #7c3aed, #6366f1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .nav-links { display: flex; gap: 28px; font-size: 14px; color: #64748b; }
+  .btn-gradient { background: linear-gradient(135deg, #7c3aed, #6366f1); color: #fff; border: none; padding: 10px 22px; border-radius: 999px; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .hero { text-align: center; padding: 96px 24px; background: radial-gradient(ellipse at 50% -20%, rgba(124,58,237,.18), transparent 60%), radial-gradient(ellipse at 80% 10%, rgba(99,102,241,.15), transparent 55%); }
+  .hero h1 { font-size: 52px; line-height: 1.15; letter-spacing: -0.02em; }
+  .hero h1 .hl { background: linear-gradient(135deg, #7c3aed, #ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-style: italic; }
+  .hero p { margin: 20px auto 32px; max-width: 560px; color: #64748b; font-size: 18px; line-height: 1.7; }
+  .btn-row { display: flex; gap: 14px; justify-content: center; }
+  .btn-ghost { background: #fff; color: #475569; border: 1px solid #e2e8f0; padding: 10px 22px; border-radius: 999px; font-size: 14px; cursor: pointer; }
+  .eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .2em; color: #7c3aed; text-transform: uppercase; margin-bottom: 10px; }
+  .section { padding: 80px 48px; max-width: 1120px; margin: 0 auto; text-align: center; }
+  .section h2 { font-size: 36px; letter-spacing: -0.01em; }
+  .section h2 .hl { color: #7c3aed; font-style: italic; }
+  .section-sub { margin: 14px auto 48px; color: #64748b; max-width: 520px; }
+  .cards3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .card { background: #fff; border-radius: 20px; padding: 32px 26px; box-shadow: 0 10px 30px rgba(99,102,241,.10); text-align: left; }
+  .icon { width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 22px; background: linear-gradient(135deg, #ede9fe, #e0e7ff); margin-bottom: 18px; }
+  .card h3 { font-size: 17px; margin-bottom: 10px; }
+  .card p { font-size: 14px; color: #64748b; line-height: 1.7; }
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 8px; }
+  .step { background: #fff; border-radius: 20px; padding: 30px 26px; box-shadow: 0 10px 30px rgba(99,102,241,.10); text-align: left; }
+  .step .num { font-size: 40px; font-weight: 800; background: linear-gradient(135deg, #7c3aed, #6366f1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .step h3 { font-size: 16px; margin: 12px 0 8px; }
+  .step p { font-size: 13px; color: #64748b; line-height: 1.7; }
+  .stats { display: flex; justify-content: center; gap: 56px; padding: 40px 0 0; font-size: 15px; color: #94a3b8; }
+  .stats b { display: block; font-size: 32px; color: #1e1b33; }
+  .testi { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 8px; }
+  .tcard { background: #fff; border-radius: 20px; padding: 26px; box-shadow: 0 10px 30px rgba(99,102,241,.10); text-align: left; }
+  .tcard p { font-size: 14px; color: #475569; line-height: 1.8; font-style: italic; }
+  .tcard .who { margin-top: 16px; display: flex; align-items: center; gap: 10px; font-size: 13px; color: #94a3b8; }
+  .avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #c4b5fd, #a5b4fc); }
+  .cta-panel { margin: 0 auto; max-width: 880px; border-radius: 28px; padding: 72px 40px; text-align: center; color: #fff; background: linear-gradient(135deg, #7c3aed, #6366f1 55%, #8b5cf6); box-shadow: 0 24px 60px rgba(124,58,237,.35); }
+  .cta-panel h2 { font-size: 34px; }
+  .cta-panel p { margin: 14px 0 28px; opacity: .85; }
+  .cta-panel .btn-white { background: #fff; color: #6d28d9; border: none; padding: 12px 30px; border-radius: 999px; font-size: 15px; font-weight: 700; cursor: pointer; }
+  footer { padding: 40px; text-align: center; color: #94a3b8; font-size: 13px; }
+  .meta { font-size: 13px; color: #94a3b8; margin-top: 6px; }
+</style>
+</head>
+<body>
+  <nav class="nav">
+    <div class="logo">NovaWriter</div>
+    <div class="nav-links"><span>Features</span><span>How it works</span><span>Pricing</span><span>Blog</span></div>
+    <button class="btn-gradient">Get Started Free</button>
+  </nav>
+
+  <header class="hero">
+    <h1>Supercharge <span class="hl">Your</span> Writing<br/>with the Power of AI</h1>
+    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua, quis nostrud exercitation ullamco.</p>
+    <div class="btn-row">
+      <button class="btn-gradient">Start Writing Now</button>
+      <button class="btn-ghost">Watch Demo ▶</button>
+    </div>
+    <div class="meta">Trusted by 10,000+ writers worldwide</div>
+  </header>
+
+  <section class="section">
+    <div class="eyebrow">Features</div>
+    <h2>Everything You Need to <span class="hl">Write Faster</span></h2>
+    <p class="section-sub">Lorem ipsum dolor sit amet consectetur adipisicing elit, sed do eiusmod tempor.</p>
+    <div class="cards3">
+      <div class="card"><div class="icon">✨</div><h3>AI-Powered Generation</h3><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut enim ad minim veniam, quis nostrud exercitation.</p></div>
+      <div class="card"><div class="icon">🚀</div><h3>Lightning Fast</h3><p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p></div>
+      <div class="card"><div class="icon">🔒</div><h3>Secure & Private</h3><p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium.</p></div>
+    </div>
+    <div class="stats">
+      <div><b>10k+</b>Active Users</div>
+      <div><b>1M+</b>Documents</div>
+      <div><b>99%</b>Satisfaction</div>
+    </div>
+  </section>
+
+  <section class="section" style="background: #fff;">
+    <div class="eyebrow">How it works</div>
+    <h2>Start in <span class="hl">Three</span> Simple Steps</h2>
+    <div class="steps">
+      <div class="step"><div class="num">01</div><h3>Sign Up</h3><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt.</p></div>
+      <div class="step"><div class="num">02</div><h3>Choose Template</h3><p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip.</p></div>
+      <div class="step"><div class="num">03</div><h3>Generate & Edit</h3><p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore.</p></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="eyebrow">Testimonials</div>
+    <h2>Loved by <span class="hl">Writers</span> Everywhere</h2>
+    <div class="testi">
+      <div class="tcard"><p>"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore."</p><div class="who"><div class="avatar"></div>John D. · Product Manager</div></div>
+      <div class="tcard"><p>"Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo."</p><div class="who"><div class="avatar"></div>Sarah M. · Content Creator</div></div>
+      <div class="tcard"><p>"Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla."</p><div class="who"><div class="avatar"></div>Mike L. · Journalist</div></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="cta-panel">
+      <h2>Ready to Transform Your Writing?</h2>
+      <p>Join thousands of writers who are already using NovaWriter.</p>
+      <button class="btn-white">Get Started — It's Free</button>
+    </div>
+  </section>
+
+  <footer>© 2026 NovaWriter. All rights reserved. · Privacy · Terms · Contact</footer>
+</body>
+</html>

@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NovaWriter — 让每一篇初稿，都接近定稿</title>
+<style>
+  :root {
+    --bg: #09090b; --panel: #18181b; --line: #27272a;
+    --text: #f4f4f5; --muted: #a1a1aa; --dim: #71717a;
+    --accent: #22d3ee; --accent2: #a5b4fc;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif; background: var(--bg); color: var(--text); }
+  .mono { font-family: "JetBrains Mono", Consolas, monospace; font-variant-numeric: tabular-nums; }
+
+  /* 全局背景层：星云极光（Aurora 观感）+ 星点，fixed 全局挂载 */
+  #bg { position: fixed; inset: 0; z-index: 0; overflow: hidden; }
+  .blob { position: absolute; border-radius: 50%; filter: blur(90px); opacity: .62; will-change: transform; }
+  .blobs { position: absolute; inset: -40px; transition: transform .6s cubic-bezier(.2,.8,.2,1); }
+  .b1 { width: 620px; height: 620px; background: radial-gradient(circle, #0e7490, transparent 68%); top: -180px; left: -140px; animation: drift1 20s ease-in-out infinite alternate; }
+  .b2 { width: 540px; height: 540px; background: radial-gradient(circle, #4338ca, transparent 68%); top: -60px; right: -180px; animation: drift2 26s ease-in-out infinite alternate; }
+  .b3 { width: 560px; height: 560px; background: radial-gradient(circle, #6d28d9, transparent 68%); bottom: -240px; left: 26%; animation: drift3 32s ease-in-out infinite alternate; }
+  .b4 { width: 380px; height: 380px; background: radial-gradient(circle, #0e7490, transparent 68%); bottom: -120px; right: 18%; animation: drift1 24s ease-in-out infinite alternate-reverse; }
+  @keyframes drift1 { to { transform: translate(140px, 70px) scale(1.18); } }
+  @keyframes drift2 { to { transform: translate(-110px, 90px) scale(1.12); } }
+  @keyframes drift3 { to { transform: translate(90px, -110px) scale(1.15); } }
+  #bg canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  #bg .veil { position: absolute; inset: 0; background: rgba(9, 9, 11, .3); }
+  @media (prefers-reduced-motion: reduce) { .blob { animation: none; } .blobs { transition: none; } }
+  .page { position: relative; z-index: 1; }
+
+  .nav { display: flex; justify-content: space-between; align-items: center; padding: 16px 40px; border-bottom: 1px solid var(--line); }
+  .logo { font-weight: 700; font-size: 16px; letter-spacing: .02em; }
+  .logo em { color: var(--accent); font-style: normal; }
+  .nav-links { display: flex; gap: 28px; font-size: 14px; color: var(--muted); }
+  .nav-links a { color: inherit; text-decoration: none; }
+  .nav-links a:hover { color: var(--accent); }
+
+  /* Hero：单一焦点动效 = 标题解密（React Bits「Decrypted Text」等效） */
+  .hero { max-width: 1040px; margin: 0 auto; padding: 120px 40px 104px; }
+  .hero .eyebrow-row { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+  .hero .eyebrow-row::before { content: ""; width: 20px; height: 1px; background: var(--accent); }
+  .hero h1 { margin-top: 20px; font-size: 40px; line-height: 1.3; font-weight: 700; letter-spacing: .01em; max-width: 640px; min-height: 2.6em; }
+  .hero h1 .accent { color: var(--accent); }
+  .hero h1 .glyph { color: rgba(34, 211, 238, .45); }
+  .hero p.sub { margin-top: 16px; max-width: 560px; font-size: 15px; line-height: 1.9; color: var(--muted); }
+  .hero .btns { margin-top: 32px; display: flex; gap: 12px; }
+  .btn-primary { background: var(--accent); color: #05242b; border: none; padding: 12px 28px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .btn-primary:hover { filter: brightness(1.1); }
+  .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--line); padding: 12px 28px; border-radius: 8px; font-size: 14px; cursor: pointer; }
+  .btn-ghost:hover { color: var(--text); border-color: var(--dim); }
+
+  /* 数据条：React Bits「Count Up」等效（进入视口滚动计数） */
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; max-width: 1040px; margin: 0 auto; padding: 0 40px 88px; }
+  .stat { border: 1px solid var(--line); border-radius: 8px; padding: 20px; }
+  .stat b { display: block; font-size: 26px; font-weight: 700; color: var(--accent); }
+  .stat span { display: block; margin-top: 6px; font-size: 12px; color: var(--dim); }
+
+  .section { max-width: 1040px; margin: 0 auto; padding: 88px 40px; }
+  .section + .section { border-top: 1px solid var(--line); }
+  .section h2 { font-size: 28px; font-weight: 700; }
+  .section .sub { margin: 10px 0 40px; font-size: 14px; color: var(--muted); }
+
+  .features { display: grid; grid-template-columns: 3fr 2fr; gap: 16px; }
+  .feature { border: 1px solid var(--line); border-radius: 8px; background: rgba(24, 24, 27, .82); padding: 28px; }
+  .feature h3 { font-size: 17px; margin-bottom: 12px; }
+  .feature p { font-size: 14px; line-height: 1.9; color: var(--muted); }
+  .feature + .feature { margin-bottom: 16px; }
+  .feature .tag { display: inline-block; margin-bottom: 14px; font-size: 12px; color: var(--accent); border: 1px solid rgba(34,211,238,.35); padding: 2px 10px; border-radius: 999px; }
+  .feature.wide { grid-column: 1 / -1; }
+
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
+  .step h3 { font-size: 15px; margin: 10px 0 8px; }
+  .step .no { font-size: 13px; color: var(--accent); }
+  .step p { font-size: 14px; line-height: 1.8; color: var(--muted); }
+
+  .cta { text-align: center; padding: 88px 40px; border-top: 1px solid var(--line); }
+  .cta h2 { font-size: 28px; }
+  .cta p { margin: 12px 0 32px; font-size: 14px; color: var(--muted); }
+  footer { padding: 28px 40px; font-size: 12px; color: var(--dim); display: flex; justify-content: space-between; max-width: 1040px; margin: 0 auto; }
+  footer .credit { color: var(--dim); }
+  footer .credit a { color: var(--muted); text-decoration: none; }
+  footer .credit a:hover { color: var(--accent); }
+</style>
+</head>
+<body>
+  <!-- 全局背景：星云极光（Aurora 观感）+ 星点，fixed 全局挂载 -->
+  <div id="bg" aria-hidden="true">
+    <div class="blobs"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div></div>
+    <canvas></canvas><div class="veil"></div>
+  </div>
+
+  <div class="page">
+    <nav class="nav">
+      <div class="logo">Nova<em>Writer</em></div>
+      <div class="nav-links"><a href="#features">功能</a><a href="#how">流程</a><a href="#cta">开始使用</a></div>
+      <div class="mono" style="font-size:13px;color:var(--dim)">v2.4 · 中文优化</div>
+    </nav>
+
+    <header class="hero">
+      <div class="eyebrow-row">AI 写作助手 · 面向中文长文场景</div>
+      <h1 id="decrypt-title">
+        <span data-decrypt>让每一篇初稿，</span><br/>
+        <span data-decrypt>都接近</span><span class="accent" data-decrypt>定稿</span><span data-decrypt>。</span>
+      </h1>
+      <p class="sub">NovaWriter 把结构规划、初稿生成与逐段润色合成一条流水线：你给大纲与素材，它交付可直接使用的成稿，并标注每一处的改写依据。</p>
+      <div class="btns">
+        <button class="btn-primary">免费开始写作</button>
+        <button class="btn-ghost">查看示例文稿</button>
+      </div>
+    </header>
+
+    <div class="stats">
+      <div class="stat"><b class="mono" data-count="42" data-suffix=" 秒">0 秒</b><span>千字初稿平均耗时</span></div>
+      <div class="stat"><b class="mono" data-count="60" data-prefix="-" data-suffix="%">-0%</b><span>返工修改轮次</span></div>
+      <div class="stat"><b class="mono" data-count="12" data-suffix=" 万">0 万</b><span>月活写作者</span></div>
+      <div class="stat"><b class="mono" data-count="98.2" data-decimals="1" data-suffix="%">0%</b><span>事实引用可溯源</span></div>
+    </div>
+
+    <section class="section" id="features">
+      <h2>为长文写作设计的三件事</h2>
+      <p class="sub">不做万能生成器，只把中文长文里最耗时的三段流程做透。</p>
+      <div class="features">
+        <div class="feature">
+          <span class="tag">核心</span>
+          <h3>结构先行的成稿流水线</h3>
+          <p>先与你确认大纲与论点顺序，再逐段生成。每段附「写作意图」标注：哪句是事实引用、哪句是论证展开、哪句建议你亲自改写——初稿不再是一团需要重新拆解的墨迹。</p>
+        </div>
+        <div class="feature">
+          <span class="tag">协作</span>
+          <h3>逐段批注式润色</h3>
+          <p>像编辑一样在段落旁给出改写建议，接受或驳回均会回写训练偏好。</p>
+        </div>
+        <div class="feature wide">
+          <span class="tag">溯源</span>
+          <h3>每一句都有出处</h3>
+          <p>所有事实性陈述强制挂载引用来源，点击即可核验原文。没有来源的句子会被明确标记为「AI 推断」，而不是混在正文里冒充事实——这是我们把「可信」放在「流畅」前面的原因。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="how">
+      <h2>三步上手</h2>
+      <p class="sub">从空白文档到可交付初稿，平均一次会话内完成。</p>
+      <div class="steps">
+        <div class="step"><span class="no">STEP 1</span><h3>投喂素材</h3><p>粘贴资料、拖入文档或只给一句话主题，自动整理为结构化大纲。</p></div>
+        <div class="step"><span class="no">STEP 2</span><h3>确认大纲</h3><p>拖拽调整章节顺序与详略权重，AI 按你确认的结构展开成稿。</p></div>
+        <div class="step"><span class="no">STEP 3</span><h3>逐段定稿</h3><p>在批注模式下逐段接受润色，导出为 Markdown / Word / 公众号格式。</p></div>
+      </div>
+    </section>
+
+    <section class="cta" id="cta">
+      <h2>今天就把下一份长文交给它</h2>
+      <p>免费额度无需绑定支付方式，导出不加锁。</p>
+      <button class="btn-primary">免费开始写作</button>
+    </section>
+
+    <footer>
+      <span>© 2026 NovaWriter</span>
+      <span class="credit">动效由 React Bits 组件驱动：<a href="https://www.reactbits.dev/backgrounds/particles">Particles</a> · <a href="https://www.reactbits.dev/text-animations/decrypted-text">DecryptedText</a> · <a href="https://www.reactbits.dev/text-animations/count-up">CountUp</a>（本页为静态等效演示）</span>
+    </footer>
+  </div>
+
+<script>
+(function () {
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---- 粒子背景（Particles 等效） ---- */
+  var canvas = document.querySelector('#bg canvas');
+  var ctx = canvas.getContext('2d');
+  var COLORS = ['#67e8f9', '#818cf8', '#c084fc'];
+  var dots = [];
+  function resize() { canvas.width = innerWidth; canvas.height = innerHeight; }
+  function spawn() {
+    dots = [];
+    for (var i = 0; i < 130; i++) {
+      dots.push({
+        x: Math.random() * canvas.width, y: Math.random() * canvas.height,
+        vx: (Math.random() - .5) * .25, vy: (Math.random() - .5) * .25,
+        r: .9 + Math.random() * 1.8,
+        c: COLORS[i % COLORS.length], a: .45 + Math.random() * .5
+      });
+    }
+  }
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (var i = 0; i < dots.length; i++) {
+      var d = dots[i];
+      d.x += d.vx; d.y += d.vy;
+      if (d.x < 0) d.x = canvas.width; if (d.x > canvas.width) d.x = 0;
+      if (d.y < 0) d.y = canvas.height; if (d.y > canvas.height) d.y = 0;
+      ctx.globalAlpha = d.a;
+      ctx.fillStyle = d.c;
+      ctx.beginPath(); ctx.arc(d.x, d.y, d.r, 0, 6.2832); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    requestAnimationFrame(draw);
+  }
+  resize(); spawn();
+  window.addEventListener('resize', function () { resize(); spawn(); });
+  // 极光视差：光晕层随鼠标轻微偏移
+  var blobs = document.querySelector('.blobs');
+  if (!reduced) {
+    window.addEventListener('mousemove', function (e) {
+      var mx = e.clientX / innerWidth - .5, my = e.clientY / innerHeight - .5;
+      blobs.style.transform = 'translate3d(' + (mx * 34) + 'px,' + (my * 26) + 'px,0)';
+    });
+    requestAnimationFrame(draw);
+  }
+
+  /* ---- 标题解密（DecryptedText 等效） ---- */
+  var GLYPHS = '!<>-_\\/[]{}—=+*^?#';
+  var targets = document.querySelectorAll('[data-decrypt]');
+  if (reduced) {
+    targets.forEach(function (el) { el.dataset.done = '1'; });
+  } else {
+    targets.forEach(function (el) {
+      var finalText = el.textContent;
+      el.textContent = '';
+      var frame = 0, reveal = 0;
+      function scramble() {
+        frame++;
+        if (frame % 2) return requestAnimationFrame(scramble);
+        reveal += .34;
+        var out = '';
+        for (var i = 0; i < finalText.length; i++) {
+          if (finalText[i] === ' ') { out += ' '; continue; }
+          out += i < reveal ? finalText[i]
+               : i < reveal + 3 ? '<span class="glyph">' + GLYPHS[Math.floor(Math.random() * GLYPHS.length)] + '</span>'
+               : '';
+        }
+        el.innerHTML = out;
+        if (reveal < finalText.length + 3) requestAnimationFrame(scramble);
+        else el.textContent = finalText;
+      }
+      requestAnimationFrame(scramble);
+    });
+  }
+
+  /* ---- 数据滚动（CountUp 等效，进入视口触发） ---- */
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (!e.isIntersecting) return;
+      io.unobserve(e.target);
+      var el = e.target;
+      var target = parseFloat(el.dataset.count);
+      var decimals = parseInt(el.dataset.decimals || '0', 10);
+      var prefix = el.dataset.prefix || '', suffix = el.dataset.suffix || '';
+      var t0 = null, DUR = 1200;
+      function step(ts) {
+        if (!t0) t0 = ts;
+        var p = Math.min((ts - t0) / DUR, 1);
+        p = 1 - Math.pow(1 - p, 3); // easeOutCubic
+        el.textContent = prefix + (target * p).toFixed(decimals) + suffix;
+        if (p < 1) requestAnimationFrame(step);
+      }
+      if (reduced) { el.textContent = prefix + target.toFixed(decimals) + suffix; }
+      else requestAnimationFrame(step);
+    });
+  }, { threshold: .6 });
+  document.querySelectorAll('[data-count]').forEach(function (el) { io.observe(el); });
+})();
+</script>
+</body>
+</html>
