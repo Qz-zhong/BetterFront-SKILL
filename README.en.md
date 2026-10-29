@@ -42,9 +42,13 @@ Three failure modes when AI writes animated React pages:
 | Everything is a card: same radius, same shadow, same 3-col grid | Cards only for real grouping, asymmetric 3:2 grid, zero shadows | layout-guide · blacklist #4 + spacing rules |
 | ALL-CAPS eyebrow over every heading + meaningless big 01/02/03 | Semantic meta info; inline step numbers only because it truly is a sequence | layout-guide · blacklist #2/#3 |
 | `10k+ · 1M+ · 99%` middot strings | 4 stats, each with a verifiable concrete metric | layout-guide · blacklist #5 |
-| Motion: unfocused or over-decorated | Exactly one focal animation = decrypting headline + aurora ambience | layout-guide · blacklist #6 + "spend boldness in one place" |
+| Motion: unfocused or over-decorated | Exactly one focal animation = decrypting headline, with the nebula aurora as ambience | layout-guide · blacklist #6 + "spend boldness in one place" |
+| Buttons are static gradient blocks | A starlight trail orbits the button outline (Star Border equivalent) | interactions · button emphasis |
+| Content appears with no rhythm | Section-level scroll reveals, block-level not per-card (Animated Content equivalent) | interactions · transitions |
+| Cards give zero interactive feedback | A spotlight glow follows the pointer (Spotlight Card equivalent) | interactions · components |
+| Stats are hard-coded static numbers | Numbers count up on viewport entry (Count Up equivalent) | interactions · micro-interactions |
 
-Open [demo/comparison/before.html](demo/comparison/before.html) and [demo/comparison/after.html](demo/comparison/after.html) in your browser to compare live (the after page has a decrypting headline and parallax aurora — the parts a screenshot can't capture).
+Open [demo/comparison/before.html](demo/comparison/before.html) and [demo/comparison/after.html](demo/comparison/after.html) in your browser to compare live (the after page has a decrypting headline, star-border button, parallax aurora and card spotlights — the parts a screenshot can't capture).
 
 ## Capabilities
 
