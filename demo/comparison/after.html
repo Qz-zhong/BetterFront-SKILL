@@ -27,7 +27,7 @@
   @keyframes drift3 { to { transform: translate(90px, -110px) scale(1.15); } }
   #bg canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
   #bg .veil { position: absolute; inset: 0; background: rgba(9, 9, 11, .3); }
-  @media (prefers-reduced-motion: reduce) { .blob { animation: none; } .blobs { transition: none; } }
+  @media (prefers-reduced-motion: reduce) { .blob { animation: none; } .blobs { transition: none; } .star::before { animation: none; opacity: .5; } [data-reveal] { opacity: 1; transform: none; } }
   .page { position: relative; z-index: 1; }
 
   .nav { display: flex; justify-content: space-between; align-items: center; padding: 16px 40px; border-bottom: 1px solid var(--line); }
@@ -50,6 +50,21 @@
   .btn-primary:hover { filter: brightness(1.1); }
   .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--line); padding: 12px 28px; border-radius: 8px; font-size: 14px; cursor: pointer; }
   .btn-ghost:hover { color: var(--text); border-color: var(--dim); }
+
+  /* 按钮强调：React Bits「Star Border」等效（星光沿轮廓巡游） */
+  .star { position: relative; display: inline-flex; padding: 2px; border-radius: 999px; overflow: hidden; }
+  .star::before { content: ""; position: absolute; inset: -60%; background: conic-gradient(from 0deg, transparent 0deg 318deg, #22d3ee 340deg, #a5b4fc 350deg, transparent 360deg); animation: starSpin 4s linear infinite; }
+  .star .btn-primary { position: relative; z-index: 1; border-radius: 999px; }
+  @keyframes starSpin { to { transform: rotate(360deg); } }
+
+  /* 卡片聚光：React Bits「Spotlight Card」等效（光斑跟随指针） */
+  .spot { position: relative; overflow: hidden; }
+  .spot::before { content: ""; position: absolute; inset: 0; background: radial-gradient(280px circle at var(--mx, 50%) var(--my, 50%), rgba(34, 211, 238, .13), transparent 70%); opacity: 0; transition: opacity .25s; pointer-events: none; }
+  .spot:hover::before { opacity: 1; }
+
+  /* 分区块滚动进场：React Bits「Animated Content」等效（块级，非逐卡） */
+  [data-reveal] { opacity: 0; transform: translateY(26px); transition: opacity .7s ease, transform .7s cubic-bezier(.2, .8, .2, 1); }
+  [data-reveal].in { opacity: 1; transform: none; }
 
   /* 数据条：React Bits「Count Up」等效（进入视口滚动计数） */
   .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; max-width: 1040px; margin: 0 auto; padding: 0 40px 88px; }
@@ -106,12 +121,12 @@
       </h1>
       <p class="sub">NovaWriter 把结构规划、初稿生成与逐段润色合成一条流水线：你给大纲与素材，它交付可直接使用的成稿，并标注每一处的改写依据。</p>
       <div class="btns">
-        <button class="btn-primary">免费开始写作</button>
+        <span class="star"><button class="btn-primary">免费开始写作</button></span>
         <button class="btn-ghost">查看示例文稿</button>
       </div>
     </header>
 
-    <div class="stats">
+    <div class="stats" data-reveal>
       <div class="stat"><b class="mono" data-count="42" data-suffix=" 秒">0 秒</b><span>千字初稿平均耗时</span></div>
       <div class="stat"><b class="mono" data-count="60" data-prefix="-" data-suffix="%">-0%</b><span>返工修改轮次</span></div>
       <div class="stat"><b class="mono" data-count="12" data-suffix=" 万">0 万</b><span>月活写作者</span></div>
@@ -121,18 +136,18 @@
     <section class="section" id="features">
       <h2>为长文写作设计的三件事</h2>
       <p class="sub">不做万能生成器，只把中文长文里最耗时的三段流程做透。</p>
-      <div class="features">
-        <div class="feature">
+      <div class="features" data-reveal>
+        <div class="feature spot">
           <span class="tag">核心</span>
           <h3>结构先行的成稿流水线</h3>
           <p>先与你确认大纲与论点顺序，再逐段生成。每段附「写作意图」标注：哪句是事实引用、哪句是论证展开、哪句建议你亲自改写——初稿不再是一团需要重新拆解的墨迹。</p>
         </div>
-        <div class="feature">
+        <div class="feature spot">
           <span class="tag">协作</span>
           <h3>逐段批注式润色</h3>
           <p>像编辑一样在段落旁给出改写建议，接受或驳回均会回写训练偏好。</p>
         </div>
-        <div class="feature wide">
+        <div class="feature spot wide">
           <span class="tag">溯源</span>
           <h3>每一句都有出处</h3>
           <p>所有事实性陈述强制挂载引用来源，点击即可核验原文。没有来源的句子会被明确标记为「AI 推断」，而不是混在正文里冒充事实——这是我们把「可信」放在「流畅」前面的原因。</p>
@@ -143,7 +158,7 @@
     <section class="section" id="how">
       <h2>三步上手</h2>
       <p class="sub">从空白文档到可交付初稿，平均一次会话内完成。</p>
-      <div class="steps">
+      <div class="steps" data-reveal>
         <div class="step"><span class="no">STEP 1</span><h3>投喂素材</h3><p>粘贴资料、拖入文档或只给一句话主题，自动整理为结构化大纲。</p></div>
         <div class="step"><span class="no">STEP 2</span><h3>确认大纲</h3><p>拖拽调整章节顺序与详略权重，AI 按你确认的结构展开成稿。</p></div>
         <div class="step"><span class="no">STEP 3</span><h3>逐段定稿</h3><p>在批注模式下逐段接受润色，导出为 Markdown / Word / 公众号格式。</p></div>
@@ -153,12 +168,12 @@
     <section class="cta" id="cta">
       <h2>今天就把下一份长文交给它</h2>
       <p>免费额度无需绑定支付方式，导出不加锁。</p>
-      <button class="btn-primary">免费开始写作</button>
+      <span class="star"><button class="btn-primary">免费开始写作</button></span>
     </section>
 
     <footer>
       <span>© 2026 NovaWriter</span>
-      <span class="credit">动效由 React Bits 组件驱动：<a href="https://www.reactbits.dev/backgrounds/particles">Particles</a> · <a href="https://www.reactbits.dev/text-animations/decrypted-text">DecryptedText</a> · <a href="https://www.reactbits.dev/text-animations/count-up">CountUp</a>（本页为静态等效演示）</span>
+      <span class="credit">动效由 React Bits 组件驱动：<a href="https://www.reactbits.dev/backgrounds/particles">Particles</a> · <a href="https://www.reactbits.dev/text-animations/decrypted-text">DecryptedText</a> · <a href="https://www.reactbits.dev/text-animations/count-up">CountUp</a> · <a href="https://www.reactbits.dev/animations/animated-content">AnimatedContent</a> · <a href="https://www.reactbits.dev/animations/star-border">StarBorder</a> · <a href="https://www.reactbits.dev/components/spotlight-card">SpotlightCard</a>（本页为静态等效演示）</span>
     </footer>
   </div>
 
@@ -260,6 +275,23 @@
     });
   }, { threshold: .6 });
   document.querySelectorAll('[data-count]').forEach(function (el) { io.observe(el); });
+
+  /* ---- 卡片聚光（SpotlightCard 等效）：光斑跟随指针 ---- */
+  document.querySelectorAll('.spot').forEach(function (el) {
+    el.addEventListener('mousemove', function (e) {
+      var r = el.getBoundingClientRect();
+      el.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+      el.style.setProperty('--my', (e.clientY - r.top) + 'px');
+    });
+  });
+
+  /* ---- 分区块滚动进场（AnimatedContent 等效，块级） ---- */
+  var ro = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) { e.target.classList.add('in'); ro.unobserve(e.target); }
+    });
+  }, { threshold: .15 });
+  document.querySelectorAll('[data-reveal]').forEach(function (el) { ro.observe(el); });
 })();
 </script>
 </body>

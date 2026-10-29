@@ -98,6 +98,7 @@ export default function Landing() {
 4. 移动端：光标类与 WebGL 类按 pitfalls.md 降级
 5. 每完成一层 → build/preview → 浏览器实测（见 SKILL.md Step 5）
 6. **背景全局挂载**：单页滚动站的背景用 `fixed inset-0` 挂在页面根层 + 轻遮罩（如 `bg-zinc-950/55`），滚动全程可见；挂在某个 section 内会"滚过即消失"。注意 fixed 元素不要用 `-z-10` 压进父级底色之下，遮罩放背景容器内部
+7. **分类覆盖度**：整页交付至少覆盖五大类中的 4 类（背景 / 文本动画 / 动画 / 组件 / 微交互），与页面类型强度匹配（见 interactions.md）—— 只升级背景属于半成品
 
 ## 排版参数（骨架/间距/字阶，规则详见 layout-guide.md）
 

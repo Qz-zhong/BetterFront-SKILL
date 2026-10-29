@@ -42,7 +42,11 @@ AI 写 React 动效页面有三大高频翻车点：
 | 万物皆卡片：同圆角 + 同阴影 + 同尺寸三栏 | 卡片只用于真分组，非对称 3:2 栅格，零阴影 | layout-guide · 黑名单 #4 + 间距细则 |
 | 全大写 eyebrow 挂每个标题 + 无意义大数字 01/02/03 | 元信息语义化；流程确为序列才用行内小序号 | layout-guide · 黑名单 #2/#3 |
 | `10k+ · 1M+ · 99%` 中点串与泛泛数字 | 数据条 4 项均带可验证的具体口径 | layout-guide · 黑名单 #5 |
-| 动效：无重点或过度装饰 | 全页唯一焦点动效 = 标题解密入场 + 粒子极光氛围背景 | layout-guide · 黑名单 #6 + "大胆只用在一处" |
+| 动效：无重点或过度装饰 | 全页唯一焦点动效 = 标题解密入场，星云极光做氛围 | layout-guide · 黑名单 #6 + "大胆只用在一处" |
+| 按钮是静态渐变色块 | 星光沿按钮轮廓巡游（Star Border 等效） | interactions · 按钮强调类 |
+| 内容进场无节奏 | 分区块滚动进场，块级不逐卡（Animated Content 等效） | interactions · 转场类 |
+| 卡片零交互反馈 | 聚光光斑跟随指针（Spotlight Card 等效） | interactions · 组件类 |
+| 数据是写死的静态数字 | 进入视口滚动计数（Count Up 等效） | interactions · 微交互类 |
 
 打开 [demo/comparison/before.html](demo/comparison/before.html) 与 [demo/comparison/after.html](demo/comparison/after.html) 可在浏览器中直接对比（after 页含标题解密与极光视差动效，截图截不出来的部分更有感）。
 

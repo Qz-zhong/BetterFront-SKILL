@@ -126,6 +126,7 @@ npx jsrepo@latest add https://reactbits.dev/r/<CliId>-<VARIANT>
 
 - 分层预算：背景 ×1 + 主视觉 ×1~2 + 内容区 ×2~3 + 微交互点缀，**不要超配**
 - 一屏最多 1 个焦点动效，其余做氛围
+- **分类覆盖度自查**：整页交付应体现 React Bits 五大类中的至少 4 类（背景 / 文本动画 / 动画 / 组件 / 微交互）—— 只换背景不叫完整交付，避免"背景高级了但正文还是静态半成品"
 - 优先套用 `references/recipes.md` 中现成配方（SaaS 落地页 / 个人作品集 / 产品发布页）
 - **骨架与排版遵循 `references/layout-guide.md`**（骨架配方 + 8pt 间距 + 字阶 + 反模板黑名单）
 - 用户使用 Next.js 且明确要"完整可部署模板"时，可提及 React Bits Pro（其中有免费作品集模板），但不要主动推销
