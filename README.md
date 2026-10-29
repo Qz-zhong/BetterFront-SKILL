@@ -3,6 +3,8 @@
 > **AI writes frontend. BetterFront makes it memorable.**
 > 给 AI 编程助手装上动效前端大脑 —— 让 Claude Code / Trae / Cursor 等 Agent 写出更有"人味"的前端页面。
 
+**English docs**: [README.en.md](README.en.md)
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 ![Agent Skills](https://img.shields.io/badge/spec-Agent%20Skills-green)
 ![Components](https://img.shields.io/badge/components-217-blueviolet)
