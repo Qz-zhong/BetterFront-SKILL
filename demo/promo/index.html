@@ -11,17 +11,18 @@
     --accent: #22d3ee; --accent2: #a5b4fc; --danger: #f87171; --ok: #34d399;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  html, body { height: 100%; background: #000; overflow: hidden; }
+  html, body { height: 100%; background: #09090b; overflow: hidden; }
   body { font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif; }
   .mono { font-family: "JetBrains Mono", Consolas, monospace; font-variant-numeric: tabular-nums; }
 
-  /* 舞台 1920×1080 等比缩放 */
+  /* 舞台 1920×1080 等比缩放；#cam 为虚拟摄影机（滚轮缩放 / 拖拽平移） */
   #wrap { position: fixed; inset: 0; display: grid; place-items: center; }
+  #cam { position: relative; transform-origin: center; will-change: transform; }
   #stage { position: relative; width: 1920px; height: 1080px; background: var(--bg); overflow: hidden; transform-origin: center; }
 
   /* 全局背景：星云极光 + 星点（时间驱动） */
   #bg { position: absolute; inset: 0; overflow: hidden; }
-  .blob { position: absolute; border-radius: 50%; filter: blur(110px); opacity: .6; }
+  .blob { position: absolute; border-radius: 50%; filter: blur(110px); opacity: .55; }
   .b1 { width: 720px; height: 720px; background: radial-gradient(circle, #0e7490, transparent 68%); top: -220px; left: -160px; }
   .b2 { width: 620px; height: 620px; background: radial-gradient(circle, #4338ca, transparent 68%); top: -80px; right: -200px; }
   .b3 { width: 640px; height: 640px; background: radial-gradient(circle, #6d28d9, transparent 68%); bottom: -280px; left: 24%; }
@@ -32,14 +33,17 @@
   .scene { position: absolute; inset: 0; opacity: 0; visibility: hidden; }
   .scene.on { visibility: visible; }
 
-  /* 字幕轨 */
-  #sub { position: absolute; left: 50%; bottom: 56px; transform: translateX(-50%); max-width: 1500px; text-align: center; }
-  #subtext { display: inline-block; background: rgba(0, 0, 0, .58); border: 1px solid rgba(255, 255, 255, .08); border-radius: 12px; padding: 14px 34px; font-size: 32px; line-height: 1.5; color: #f4f4f5; }
+  /* 字幕轨（高对比：深底 + 毛玻璃 + 描边） */
+  #sub { position: absolute; left: 50%; bottom: 56px; transform: translateX(-50%); max-width: 1500px; text-align: center; z-index: 20; }
+  #subtext { display: inline-block; background: rgba(9, 9, 11, .88); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, .14); border-radius: 12px; padding: 14px 34px; font-size: 32px; line-height: 1.5; color: #fafafa; text-shadow: 0 2px 8px rgba(0, 0, 0, .8); }
   #subtext em { color: var(--accent); font-style: normal; font-weight: 600; }
   #subtext.warn em { color: var(--danger); }
 
+  /* 底部常驻渐晕：保证字幕区永远压得住背景 */
+  #vig { position: absolute; left: 0; right: 0; bottom: 0; height: 280px; background: linear-gradient(to bottom, rgba(0,0,0,0), rgba(0,0,0,.72)); pointer-events: none; z-index: 10; }
+
   /* 控制层 */
-  #ui { position: absolute; left: 0; right: 0; bottom: 0; display: flex; align-items: center; gap: 14px; padding: 10px 20px; background: rgba(0,0,0,.5); opacity: 1; transition: opacity .3s; }
+  #ui { position: absolute; left: 0; right: 0; bottom: 0; display: flex; align-items: center; gap: 14px; padding: 10px 20px; background: rgba(0,0,0,.5); opacity: 1; transition: opacity .3s; z-index: 25; }
   #ui button { background: #18181b; color: #e4e4e7; border: 1px solid #2a2a2e; border-radius: 6px; padding: 6px 12px; font-size: 14px; cursor: pointer; }
   #ui button:hover { border-color: var(--accent); color: var(--accent); }
   #bar { flex: 1; height: 8px; background: #26262b; border-radius: 4px; cursor: pointer; position: relative; }
@@ -148,10 +152,11 @@
 </head>
 <body>
 <div id="wrap">
+  <div id="cam">
   <div id="stage">
     <div id="bg" aria-hidden="true">
       <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
-      <canvas id="stars"></canvas><div class="veil" style="position:absolute;inset:0;background:rgba(9,9,11,.3)"></div>
+      <canvas id="stars"></canvas><div class="veil" style="position:absolute;inset:0;background:rgba(9,9,11,.45)"></div>
     </div>
 
     <!-- S0 0:00-0:05 -->
@@ -274,15 +279,18 @@
       </div>
     </section>
 
+    <div id="vig"></div>
     <div id="sub"><div id="subtext"></div></div>
-    <div id="startOverlay"><div class="play">▶</div><p>点击播放 · Space 播放/暂停 · ← → 快退快进</p></div>
+    <div id="startOverlay"><div class="play">▶</div><p>点击播放 · Space 播放/暂停 · ← → 快退快进 · 滚轮缩放 / 拖拽平移 / 双击复位 · F 全屏</p></div>
     <div id="ui">
       <button id="btnPlay">⏸ 暂停</button>
       <button id="btnReplay">↺ 重播</button>
+      <button id="btnFs">⛶ 全屏</button>
       <div id="bar"><div id="barfill"></div></div>
       <span id="time" class="mono">00:00 / 01:30</span>
     </div>
   </div>
+  </div><!-- /cam -->
 </div>
 
 <script>
@@ -305,6 +313,33 @@
     stage.style.transform = 'scale(' + s + ')';
   }
   fit(); addEventListener('resize', fit);
+
+  /* ---------- 虚拟摄影机：滚轮缩放 / 拖拽平移 / 双击复位 / F 全屏 ---------- */
+  var cam = document.getElementById('cam');
+  var cz = 1, cx = 0, cy = 0;
+  function applyCam() { cam.style.transform = 'translate(' + cx + 'px,' + cy + 'px) scale(' + cz + ')'; }
+  document.getElementById('wrap').addEventListener('wheel', function (e) {
+    e.preventDefault();
+    cz = clamp(cz * (e.deltaY < 0 ? 1.12 : 0.89), .4, 4);
+    applyCam();
+  }, { passive: false });
+  var drag = null;
+  document.getElementById('wrap').addEventListener('mousedown', function (e) {
+    if (e.target.closest('#ui') || e.target.closest('#startOverlay')) return;
+    drag = { x: e.clientX, y: e.clientY, cx: cx, cy: cy };
+  });
+  addEventListener('mousemove', function (e) {
+    if (!drag) return;
+    cx = drag.cx + (e.clientX - drag.x); cy = drag.cy + (e.clientY - drag.y);
+    applyCam();
+  });
+  addEventListener('mouseup', function () { drag = null; });
+  document.getElementById('wrap').addEventListener('dblclick', function () { cz = 1; cx = 0; cy = 0; applyCam(); });
+  function toggleFs() {
+    if (document.fullscreenElement) document.exitFullscreen();
+    else document.documentElement.requestFullscreen();
+  }
+  document.getElementById('btnFs').addEventListener('click', toggleFs);
 
   /* ---------- 工具 ---------- */
   function seg(t, a, b) { return Math.max(0, Math.min(1, (t - a) / (b - a))); }
@@ -558,6 +593,7 @@
     if (e.code === 'ArrowRight') seek(tCur + 5);
     if (e.code === 'ArrowLeft') seek(tCur - 5);
     if (e.key === 'r' || e.key === 'R') { seek(0); play(); }
+    if (e.key === 'f' || e.key === 'F') toggleFs();
   });
 
   function seek(t) { tCur = clamp(t, 0, DUR); if (!started) { started = true; } render(tCur); }
