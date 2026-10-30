@@ -77,16 +77,25 @@ AI 写 React 动效页面有三大高频翻车点：
 
 ```bash
 # Claude Code（全局）
-git clone https://github.com/<you>/BetterFront-SKILL ~/.claude/skills/betterfront
+git clone https://github.com/Qz-zhong/BetterFront-SKILL ~/.claude/skills/betterfront
 
 # Trae（项目级）
-git clone https://github.com/<you>/BetterFront-SKILL .trae/skills/betterfront
+git clone https://github.com/Qz-zhong/BetterFront-SKILL .trae/skills/betterfront
 
 # 其他遵循 Agent Skills 规范的 Agent
 将本仓库放入对应 skills 目录即可
 ```
 
 安装后，直接对 Agent 说"帮我做一个 XX 网站 / 看板"，Skill 会自动介入选型流程。
+
+**跨 Agent 通用性**（不绑定任何一家工具链）：
+
+| 能力 | 缺失时 | 表现 |
+|---|---|---|
+| Node.js（≥18） | 脚本跑不了 | 降级为直接读 `components.yaml` + `taxonomy.json` 手工筛选，选型结论一致 |
+| MCP / registry 通道 | 无 MCP 配置 | 降级为 `npx shadcn@latest add ...` CLI，再降级为手动复制源码 |
+| 浏览器自动化 | 截不了图 | 降级为给 `npm run dev` 指引 + 预期效果清单，请用户确认 |
+| 网络 | 离线 | 217 组件目录、依赖、属性池全部内置在本仓库，离线可用（仅"同步最新目录"需联网） |
 
 ## 兼容性
 

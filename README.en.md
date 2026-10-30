@@ -77,16 +77,25 @@ Open [demo/comparison/before.html](demo/comparison/before.html) and [demo/compar
 
 ```bash
 # Claude Code (global)
-git clone https://github.com/<you>/BetterFront-SKILL ~/.claude/skills/betterfront
+git clone https://github.com/Qz-zhong/BetterFront-SKILL ~/.claude/skills/betterfront
 
 # Trae (project-level)
-git clone https://github.com/<you>/BetterFront-SKILL .trae/skills/betterfront
+git clone https://github.com/Qz-zhong/BetterFront-SKILL .trae/skills/betterfront
 
 # Any other spec-compliant agent
 drop this repo into your agent's skills directory
 ```
 
 Then just tell your agent: *"build me a landing page for X"* — the skill steps in automatically.
+
+**Agent-agnostic by design** (no dependency on any single toolchain):
+
+| Capability | If missing | Behaviour |
+|---|---|---|
+| Node.js (≥18) | scripts can't run | Fall back to reading `components.yaml` + `taxonomy.json` by hand — same selection outcome |
+| MCP / registry channel | no MCP configured | Fall back to `npx shadcn@latest add ...`, then to copying source manually |
+| Browser automation | no screenshots | Fall back to `npm run dev` instructions + an expected-effects checklist for the user |
+| Network | offline | The 217-component catalog, deps and attribute pool are all vendored in this repo (only "sync latest catalog" needs network) |
 
 ## Compatibility
 
