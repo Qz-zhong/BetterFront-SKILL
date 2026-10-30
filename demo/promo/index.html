@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>BetterFront — 90s Promo（纯网页实现）</title>
+<style>
+  :root {
+    --bg: #09090b; --panel: #18181b; --line: #27272a;
+    --text: #f4f4f5; --muted: #a1a1aa; --dim: #71717a;
+    --accent: #22d3ee; --accent2: #a5b4fc; --danger: #f87171; --ok: #34d399;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; background: #000; overflow: hidden; }
+  body { font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif; }
+  .mono { font-family: "JetBrains Mono", Consolas, monospace; font-variant-numeric: tabular-nums; }
+
+  /* 舞台 1920×1080 等比缩放 */
+  #wrap { position: fixed; inset: 0; display: grid; place-items: center; }
+  #stage { position: relative; width: 1920px; height: 1080px; background: var(--bg); overflow: hidden; transform-origin: center; }
+
+  /* 全局背景：星云极光 + 星点（时间驱动） */
+  #bg { position: absolute; inset: 0; overflow: hidden; }
+  .blob { position: absolute; border-radius: 50%; filter: blur(110px); opacity: .6; }
+  .b1 { width: 720px; height: 720px; background: radial-gradient(circle, #0e7490, transparent 68%); top: -220px; left: -160px; }
+  .b2 { width: 620px; height: 620px; background: radial-gradient(circle, #4338ca, transparent 68%); top: -80px; right: -200px; }
+  .b3 { width: 640px; height: 640px; background: radial-gradient(circle, #6d28d9, transparent 68%); bottom: -280px; left: 24%; }
+  #bg canvas { position: absolute; inset: 0; }
+  #bg .veil { position: absolute; inset: 0; background: rgba(9, 9, 11, .34); }
+
+  /* 场景容器 */
+  .scene { position: absolute; inset: 0; opacity: 0; visibility: hidden; }
+  .scene.on { visibility: visible; }
+
+  /* 字幕轨 */
+  #sub { position: absolute; left: 50%; bottom: 56px; transform: translateX(-50%); max-width: 1500px; text-align: center; }
+  #subtext { display: inline-block; background: rgba(0, 0, 0, .58); border: 1px solid rgba(255, 255, 255, .08); border-radius: 12px; padding: 14px 34px; font-size: 32px; line-height: 1.5; color: #f4f4f5; }
+  #subtext em { color: var(--accent); font-style: normal; font-weight: 600; }
+  #subtext.warn em { color: var(--danger); }
+
+  /* 控制层 */
+  #ui { position: absolute; left: 0; right: 0; bottom: 0; display: flex; align-items: center; gap: 14px; padding: 10px 20px; background: rgba(0,0,0,.5); opacity: 1; transition: opacity .3s; }
+  #ui button { background: #18181b; color: #e4e4e7; border: 1px solid #2a2a2e; border-radius: 6px; padding: 6px 12px; font-size: 14px; cursor: pointer; }
+  #ui button:hover { border-color: var(--accent); color: var(--accent); }
+  #bar { flex: 1; height: 8px; background: #26262b; border-radius: 4px; cursor: pointer; position: relative; }
+  #barfill { position: absolute; inset: 0 auto 0 0; width: 0%; background: var(--accent); border-radius: 4px; }
+  #time { font-size: 13px; color: var(--dim); }
+  body.clean #ui, body.clean #startOverlay { display: none; }
+
+  #startOverlay { position: absolute; inset: 0; z-index: 30; display: grid; place-items: center; background: rgba(0,0,0,.55); cursor: pointer; }
+  #startOverlay .play { width: 150px; height: 150px; border-radius: 50%; border: 3px solid var(--accent); display: grid; place-items: center; color: var(--accent); font-size: 56px; background: rgba(9,9,11,.7); }
+  #startOverlay p { position: absolute; margin-top: 240px; color: var(--muted); font-size: 22px; }
+
+  /* ===== S0 开场 ===== */
+  #s0 .big { position: absolute; inset: 0; display: grid; place-items: center; }
+  #s0 h1 { font-size: 110px; font-weight: 900; letter-spacing: .04em; color: var(--text); }
+  #s0 h1 span { display: inline-block; opacity: 0; transform: translateY(30px) scale(1.25); }
+  #s0 h1 .bad { color: var(--danger); }
+  #s0 .dark { position: absolute; inset: 0; background: #000; }
+
+  /* ===== 终端（S1a / S3b 共用样式） ===== */
+  .term { width: 1240px; margin: 0 auto; background: #101013; border: 1px solid #2a2a2e; border-radius: 14px; overflow: hidden; box-shadow: 0 30px 80px rgba(0,0,0,.6); }
+  .term .bar { display: flex; gap: 8px; padding: 14px 18px; background: #17171b; }
+  .term .bar i { width: 14px; height: 14px; border-radius: 50%; background: #3f3f46; }
+  .term .bar i:first-child { background: #f87171; } .term .bar i:nth-child(2) { background: #fbbf24; } .term .bar i:nth-child(3) { background: #34d399; }
+  .term .body { padding: 30px 34px; font-size: 26px; line-height: 1.85; color: #d4d4d8; min-height: 300px; }
+  .term .body .ok { color: var(--ok); } .term .body .err { color: var(--danger); } .term .body .cmd { color: #e4e4e7; }
+  .term .body .cmd::before { content: "$ "; color: var(--accent); }
+  .term .caret { display: inline-block; width: 12px; height: 26px; background: var(--accent); vertical-align: -4px; animation: blink 1s steps(2) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* ===== S1b 白屏 + 报错弹窗 ===== */
+  #s1b .page { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 1200px; height: 640px; background: #fafafa; border-radius: 16px; }
+  #s1b .modal { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 720px; background: #1c1c21; border: 1px solid #3f3f46; border-radius: 12px; padding: 30px 34px; box-shadow: 0 30px 80px rgba(0,0,0,.55); }
+  #s1b .modal h3 { color: var(--danger); font-size: 28px; margin-bottom: 12px; }
+  #s1b .modal code { font-size: 20px; color: #e4e4e7; line-height: 1.7; display: block; }
+
+  /* ===== S1c AI 味页面 + 圈注 ===== */
+  #s1c .frame { position: absolute; right: 120px; top: 70px; width: 780px; height: 880px; border-radius: 14px; overflow: hidden; border: 1px solid #2a2a2e; box-shadow: 0 30px 80px rgba(0,0,0,.6); }
+  #s1c iframe { width: 1440px; height: 2600px; border: 0; transform: scale(.5417); transform-origin: 0 0; }
+  #s1c .notes { position: absolute; left: 110px; top: 170px; width: 780px; }
+  #s1c .note { opacity: 0; background: rgba(9,9,11,.78); border: 1px solid var(--danger); border-radius: 10px; padding: 14px 20px; font-size: 24px; color: #fecaca; margin-bottom: 26px; }
+  #s1c .note b { color: var(--danger); }
+
+  /* ===== S2 介绍 ===== */
+  #s2 .wrap { position: absolute; inset: 0; display: grid; place-items: center; }
+  #s2 .logo { font-size: 130px; font-weight: 900; letter-spacing: .01em; }
+  #s2 .logo em { color: var(--accent); font-style: normal; }
+  #s2 .slogan { text-align: center; margin-top: 26px; font-size: 30px; color: var(--muted); }
+  #s2 .badges { display: flex; gap: 24px; justify-content: center; margin-top: 70px; }
+  #s2 .badge { opacity: 0; border: 1px solid var(--line); background: rgba(24,24,27,.85); border-radius: 999px; padding: 16px 34px; font-size: 26px; color: var(--accent); }
+  #s2 .badge b { color: var(--text); }
+
+  /* ===== S3a 主题分析 ===== */
+  #s3a .wrap { position: absolute; left: 130px; right: 130px; top: 150px; }
+  #s3a h2, #s3b h2, #s4 h2, #s5 h2 { font-size: 44px; margin-bottom: 50px; }
+  #s3a h2 em, #s3b h2 em, #s4 h2 em, #s5 h2 em { color: var(--accent); font-style: normal; }
+  #s3a .rows .row { display: flex; gap: 18px; align-items: center; margin-bottom: 26px; opacity: 0; transform: translateX(-40px); }
+  #s3a .rows .k { width: 130px; color: var(--dim); font-size: 22px; }
+  #s3a .rows .v { background: rgba(24,24,27,.85); border: 1px solid var(--line); border-radius: 8px; padding: 12px 22px; font-size: 24px; }
+  #s3a .cands { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 40px; }
+  #s3a .cand { opacity: 0; transform: translateY(36px); border: 2px solid var(--line); border-radius: 14px; background: rgba(24,24,27,.85); padding: 26px; text-align: center; }
+  #s3a .cand .sw { height: 90px; border-radius: 8px; margin-bottom: 16px; }
+  #s3a .cand h4 { font-size: 24px; margin-bottom: 6px; }
+  #s3a .cand p { font-size: 17px; color: var(--dim); }
+  #s3a .cand.sel { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(34,211,238,.18); }
+  #s3a .cand .pick { display: none; margin-top: 12px; font-size: 20px; color: var(--accent); }
+  #s3a .cand.sel .pick { display: block; }
+
+  /* ===== S3b 安装终端 ===== */
+  #s3b .term { width: 1360px; margin-top: 20px; }
+
+  /* ===== S4 分屏 ===== */
+  #s4 h2 { text-align: center; margin-top: 90px; }
+  #s4 .pill { position: absolute; left: 50%; top: 210px; transform: translateX(-50%); background: rgba(24,24,27,.9); border: 1px solid var(--line); border-radius: 999px; padding: 12px 34px; font-size: 24px; color: var(--muted); opacity: 0; }
+  #s4 .panes { position: absolute; left: 0; right: 0; top: 290px; display: flex; justify-content: center; gap: 28px; }
+  #s4 .pane { position: relative; width: 860px; height: 620px; border-radius: 14px; overflow: hidden; border: 1px solid #2a2a2e; background: #101013; }
+  #s4 .pane.left { transform: translateX(-600px); opacity: 0; }
+  #s4 .pane.right { transform: translateX(600px); opacity: 0; }
+  #s4 .pane .tag { position: absolute; z-index: 2; left: 20px; top: 20px; border-radius: 999px; padding: 8px 22px; font-size: 22px; opacity: 0; }
+  #s4 .pane.left .tag { background: rgba(248, 113, 113, .15); color: var(--danger); border: 1px solid rgba(248,113,113,.4); }
+  #s4 .pane.right .tag { background: rgba(34, 211, 238, .15); color: var(--accent); border: 1px solid rgba(34,211,238,.4); }
+  #s4 .clip { position: absolute; inset: 0; overflow: hidden; }
+  #s4 iframe { width: 1440px; height: 2400px; border: 0; transform-origin: 0 0; }
+
+  /* ===== S5 数据卡 ===== */
+  #s5 .grid { position: absolute; left: 130px; right: 130px; top: 300px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 30px; }
+  #s5 .card { opacity: 0; transform: perspective(900px) rotateY(70deg); border: 1px solid var(--line); background: rgba(24,24,27,.85); border-radius: 16px; padding: 46px 34px; text-align: center; }
+  #s5 .card b { display: block; font-size: 64px; color: var(--accent); }
+  #s5 .card span { display: block; margin-top: 16px; font-size: 22px; color: var(--muted); }
+
+  /* ===== S6 CTA ===== */
+  #s6 .wrap { position: absolute; inset: 0; display: grid; place-items: center; }
+  #s6 .card { width: 1160px; background: rgba(24,24,27,.9); border: 1px solid var(--line); border-radius: 20px; padding: 70px 60px; text-align: center; position: relative; overflow: visible; }
+  #s6 .repo { font-size: 38px; color: var(--text); min-height: 54px; }
+  #s6 .repo .accent { color: var(--accent); }
+  #s6 .starbtn { display: inline-flex; align-items: center; gap: 12px; margin-top: 40px; background: rgba(34,211,238,.12); color: var(--accent); border: 1px solid rgba(34,211,238,.45); border-radius: 999px; padding: 16px 44px; font-size: 26px; cursor: pointer; }
+  #s6 .starbtn.pressed { transform: scale(.94); }
+  #s6 .slogan { margin-top: 34px; font-size: 26px; color: var(--muted); opacity: 0; }
+  #s6 .burst { position: absolute; left: 50%; top: 62%; }
+  #s6 .burst i { position: absolute; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); opacity: 0; }
+  #s6 .endlogo { position: absolute; inset: 0; display: grid; place-items: center; background: var(--bg); opacity: 0; }
+  #s6 .endlogo div { text-align: center; }
+  #s6 .endlogo b { font-size: 92px; font-weight: 900; }
+  #s6 .endlogo b em { color: var(--accent); font-style: normal; }
+  #s6 .endlogo p { margin-top: 18px; font-size: 26px; color: var(--muted); }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <div id="stage">
+    <div id="bg" aria-hidden="true">
+      <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+      <canvas id="stars"></canvas><div class="veil" style="position:absolute;inset:0;background:rgba(9,9,11,.3)"></div>
+    </div>
+
+    <!-- S0 0:00-0:05 -->
+    <section class="scene" id="s0">
+      <div class="dark"></div>
+      <div class="big"><h1 id="s0title"></h1></div>
+    </section>
+
+    <!-- S1a 0:05-0:10 终端 404 -->
+    <section class="scene" id="s1a">
+      <div class="term">
+        <div class="bar"><i></i><i></i><i></i></div>
+        <div class="body mono" id="s1aBody"></div>
+      </div>
+    </section>
+
+    <!-- S1b 0:10-0:14 白屏 + 依赖报错 -->
+    <section class="scene" id="s1b">
+      <div class="page"></div>
+      <div class="modal" id="s1bModal">
+        <h3>⚠ Application error</h3>
+        <code class="mono">Module not found: Can't resolve 'gsap'<br/>Module not found: Can't resolve 'ogl'</code>
+      </div>
+    </section>
+
+    <!-- S1c 0:14-0:20 AI 味页面圈注 -->
+    <section class="scene" id="s1c">
+      <div class="frame"><iframe src="../comparison/before.html" title="before"></iframe></div>
+      <div class="notes">
+        <div class="note" data-at="1"><b>紫色渐变海</b> — AI 的默认审美</div>
+        <div class="note" data-at="2.6"><b>万物皆卡片</b> — 同圆角 · 同阴影 · 同尺寸</div>
+        <div class="note" data-at="4.2"><b>Lorem ipsum</b> — 连文案都是占位的</div>
+      </div>
+    </section>
+
+    <!-- S2 0:20-0:30 介绍 -->
+    <section class="scene" id="s2">
+      <div class="wrap">
+        <div>
+          <div class="logo" id="s2logo"></div>
+          <div class="slogan">给 AI 编程助手装上动效前端的大脑</div>
+          <div class="badges">
+            <div class="badge"><b>217</b> components</div>
+            <div class="badge"><b>5</b> categories</div>
+            <div class="badge"><b>4</b> variants auto-detect</div>
+            <div class="badge">MIT <b>open source</b></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- S3a 0:30-0:38 主题分析 + 候选 -->
+    <section class="scene" id="s3a">
+      <div class="wrap">
+        <h2>Step 1 · <em>主题分析 → 候选</em>，拍板的是你</h2>
+        <div class="rows">
+          <div class="row"><span class="k">领域词</span><span class="v">SaaS 产品 · AI 写作助手</span></div>
+          <div class="row"><span class="k">氛围词</span><span class="v">科技感 · 克制 · 深色</span></div>
+          <div class="row"><span class="k">约束</span><span class="v">正文叠底 · 移动端可读</span></div>
+        </div>
+        <div class="cands">
+          <div class="cand" id="cand1"><div class="sw" style="background:linear-gradient(135deg,#0e7490,#164e63)"></div><h4>Particles</h4><p>星空粒子 · AI 隐喻</p><div class="pick">✓ 已由你拍板</div></div>
+          <div class="cand" id="cand2"><div class="sw" style="background:linear-gradient(135deg,#4338ca,#6d28d9)"></div><h4>Nebula Aurora</h4><p>星云极光 · 表现力强</p><div class="pick">✓ 已由你拍板</div></div>
+          <div class="cand" id="cand3"><div class="sw" style="background:linear-gradient(135deg,#134e4a,#0f766e)"></div><h4>GridScan</h4><p>扫描网格 · 监控意象</p><div class="pick">✓ 已由你拍板</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- S3b 0:38-0:46 安装 -->
+    <section class="scene" id="s3b">
+      <h2 style="text-align:center">Step 2 · <em>变体自动探测，依赖一次装对</em></h2>
+      <div class="term">
+        <div class="bar"><i></i><i></i><i></i></div>
+        <div class="body mono" id="s3bBody"></div>
+      </div>
+    </section>
+
+    <!-- S4 0:46-1:06 分屏对比 -->
+    <section class="scene" id="s4">
+      <h2>Same prompt · <em>同一个 prompt</em></h2>
+      <div class="pill">↓ 真实页面 · 同步滚动 ↓</div>
+      <div class="panes">
+        <div class="pane left" id="paneL">
+          <span class="tag">✗ 无 Skill</span>
+          <div class="clip"><iframe src="../comparison/before.html" title="before" id="ifL"></iframe></div>
+        </div>
+        <div class="pane right" id="paneR">
+          <span class="tag">✓ BetterFront</span>
+          <div class="clip"><iframe src="../comparison/after.html" title="after" id="ifR"></iframe></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- S5 1:06-1:18 数据卡 -->
+    <section class="scene" id="s5">
+      <h2>不只是一个 prompt 合集 · <em>是一套工程方法</em></h2>
+      <div class="grid">
+        <div class="card"><b class="mono" id="n1">0</b><span>组件目录自动同步（含引用校验）</span></div>
+        <div class="card"><b class="mono" id="n2">0</b><span>五大类全覆盖：文本/动画/组件/微交互/背景</span></div>
+        <div class="card"><b class="mono" id="n3">0</b><span>反模板黑名单 + 排版自查条款</span></div>
+        <div class="card"><b class="mono" id="n4">0</b><span>分辨率截图验证（1080p / 768p）</span></div>
+      </div>
+    </section>
+
+    <!-- S6 1:18-1:30 CTA -->
+    <section class="scene" id="s6">
+      <div class="wrap">
+        <div class="card">
+          <div class="repo mono" id="s6repo"></div>
+          <div><span class="starbtn" id="s6star">★ Star on GitHub</span></div>
+          <div class="slogan">给 AI 装上动效前端的大脑 —— MIT 开源</div>
+          <div class="burst" id="s6burst"></div>
+        </div>
+      </div>
+      <div class="endlogo" id="s6end">
+        <div>
+          <b>Better<em>Front</em></b>
+          <p>AI writes frontend. BetterFront makes it memorable.</p>
+        </div>
+      </div>
+    </section>
+
+    <div id="sub"><div id="subtext"></div></div>
+    <div id="startOverlay"><div class="play">▶</div><p>点击播放 · Space 播放/暂停 · ← → 快退快进</p></div>
+    <div id="ui">
+      <button id="btnPlay">⏸ 暂停</button>
+      <button id="btnReplay">↺ 重播</button>
+      <div id="bar"><div id="barfill"></div></div>
+      <span id="time" class="mono">00:00 / 01:30</span>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var DUR = 90;
+  var qs = new URLSearchParams(location.search);
+  var CLEAN = qs.has('clean');
+  var REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (CLEAN) document.body.classList.add('clean');
+
+  var stage = document.getElementById('stage');
+  var subText = document.getElementById('subtext');
+  var barFill = document.getElementById('barfill');
+  var timeEl = document.getElementById('time');
+
+  /* ---------- 舞台缩放 ---------- */
+  function fit() {
+    var s = Math.min(innerWidth / 1920, innerHeight / 1080);
+    stage.style.transform = 'scale(' + s + ')';
+  }
+  fit(); addEventListener('resize', fit);
+
+  /* ---------- 工具 ---------- */
+  function seg(t, a, b) { return Math.max(0, Math.min(1, (t - a) / (b - a))); }
+  function ease(p) { return 1 - Math.pow(1 - p, 3); }
+  function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+  function pad(n) { return (n < 10 ? '0' : '') + Math.floor(n); }
+  function fmt(t) { return pad(t / 60) + ':' + pad(Math.floor(t % 60)) + (t % 1 < .5 ? '' : ''); }
+
+  /* ---------- 全局背景：星点（时间驱动，确定性） ---------- */
+  var starsCv = document.getElementById('stars');
+  var sctx = starsCv.getContext('2d');
+  var COLORS = ['#67e8f9', '#818cf8', '#c084fc'];
+  var starSeed = [];
+  for (var i = 0; i < 130; i++) {
+    starSeed.push({ x: Math.random() * 1920, y: Math.random() * 1080, vx: (Math.random() - .5) * 16, vy: (Math.random() - .5) * 12, r: .9 + Math.random() * 1.8, c: COLORS[i % 3], a: .4 + Math.random() * .5 });
+  }
+  function drawStars(t) {
+    starsCv.width = 1920; starsCv.height = 1080;
+    for (var i = 0; i < starSeed.length; i++) {
+      var s = starSeed[i];
+      var x = ((s.x + s.vx * t) % 1920 + 1920) % 1920;
+      var y = ((s.y + s.vy * t) % 1080 + 1080) % 1080;
+      sctx.globalAlpha = s.a; sctx.fillStyle = s.c;
+      sctx.beginPath(); sctx.arc(x, y, s.r, 0, 6.2832); sctx.fill();
+    }
+    sctx.globalAlpha = 1;
+  }
+
+  /* ---------- 字幕轨 ---------- */
+  var SUBS = [
+    [0.0, 4.8,  'AI 写的前端，为什么<em>一眼就能看出来</em>？', 1],
+    [5.0, 9.8,  '组件名是 AI 编的——<em>注册表里根本不存在</em>', 1],
+    [10.0, 13.8, '依赖没装齐，跑起来<em>直接白屏</em>', 1],
+    [14.0, 19.8, '渐变、卡片海、Lorem 占位——<em>一股模板味</em>', 1],
+    [20.0, 24.5, '<em>BetterFront</em>——给 AI 装上动效前端的大脑', 0],
+    [24.5, 29.8, '<em>217 个动效组件目录</em>，内置给 AI 离线检索', 0],
+    [30.0, 37.8, '它先分析主题、给出候选——但<em>拍板的永远是你</em>', 0],
+    [38.0, 45.8, '变体自动探测，<em>依赖一次装对</em>', 0],
+    [46.0, 50.0, '<em>同一个 prompt</em>——', 0],
+    [50.0, 55.5, '左边：没有 Skill', 0],
+    [55.5, 65.8, '右边：<em>BetterFront</em>', 0],
+    [66.0, 70.0, '<em>217 个组件</em>，目录自动同步', 0],
+    [70.0, 74.0, '五大类全覆盖：<em>文本 · 动画 · 组件 · 微交互 · 背景</em>', 0],
+    [74.0, 77.8, '<em>9+14 条排版规则</em>，双档截图验证', 0],
+    [78.0, 84.5, '<em>BetterFront-SKILL</em>，MIT 开源', 0],
+    [84.5, 90.0, '给 AI 装上动效前端的大脑', 0]
+  ];
+  function renderSubs(t) {
+    var cur = null;
+    for (var i = 0; i < SUBS.length; i++) if (t >= SUBS[i][0] && t < SUBS[i][1]) { cur = SUBS[i]; break; }
+    if (!cur) { subText.parentElement.style.opacity = 0; return; }
+    subText.parentElement.style.opacity = 1;
+    subText.innerHTML = cur[2];
+    subText.className = cur[3] ? 'warn' : '';
+  }
+
+  /* ---------- 场景渲染（全部为 t 的纯函数，可任意 seek） ---------- */
+  var SCENES = [
+    { t0: 0, t1: 5, el: document.getElementById('s0'), fn: s0 },
+    { t0: 5, t1: 10, el: document.getElementById('s1a'), fn: s1a },
+    { t0: 10, t1: 14, el: document.getElementById('s1b'), fn: s1b },
+    { t0: 14, t1: 20, el: document.getElementById('s1c'), fn: s1c },
+    { t0: 20, t1: 30, el: document.getElementById('s2'), fn: s2 },
+    { t0: 30, t1: 38, el: document.getElementById('s3a'), fn: s3a },
+    { t0: 38, t1: 46, el: document.getElementById('s3b'), fn: s3b },
+    { t0: 46, t1: 66, el: document.getElementById('s4'), fn: s4 },
+    { t0: 66, t1: 78, el: document.getElementById('s5'), fn: s5 },
+    { t0: 78, t1: 90, el: document.getElementById('s6'), fn: s6 }
+  ];
+
+  function s0(t) { /* 0-5 */
+    var chars = 'AI 写的前端，一眼假。'.split('');
+    var h = document.getElementById('s0title');
+    var html = '';
+    for (var i = 0; i < chars.length; i++) {
+      var p = seg(t, .5 + i * .18, .72 + i * .18);
+      var cls = (i >= 7) ? ' class="bad"' : '';
+      html += '<span' + cls + ' style="opacity:' + p + ';transform:translateY(' + (30 * (1 - p)) + 'px) scale(' + (1.25 - .25 * p) + ')">' + chars[i] + '</span>';
+    }
+    h.innerHTML = html;
+    document.querySelector('#s0 .dark').style.opacity = 1 - seg(t, 3.4, 4.9);
+  }
+
+  function s1a(t) { /* 5-10 */
+    var cmd = 'npx shadcn add https://reactbits.dev/r/FakeCard-TS-TW';
+    var lines = [];
+    var typed = cmd.slice(0, Math.floor(seg(t, .2, 2.2) * cmd.length));
+    lines.push('<span class="cmd">' + typed + (seg(t, .2, 2.2) < 1 ? '<span class="caret"></span>' : '') + '</span>');
+    if (t > 2.6) lines.push('<span class="ok">✔ Checking registry...</span>');
+    if (t > 3.6) lines.push('<span class="err">✖ ERROR 404 — component not found</span>');
+    if (t > 4.3) lines.push('<span style="color:#71717a">提示：组件名不得虚构，请查证官方目录</span>');
+    document.getElementById('s1aBody').innerHTML = lines.join('<br/>');
+  }
+
+  function s1b(t) { /* 10-14 */
+    var shake = t < 2.2 ? Math.sin((t - .4) * 42) * 7 * Math.max(0, 1 - (t - .4)) : 0;
+    var m = document.getElementById('s1bModal');
+    m.style.transform = 'translate(calc(-50% + ' + shake + 'px), -50%)';
+    m.style.opacity = seg(t, .2, .6);
+    document.querySelector('#s1b .page').style.opacity = seg(t, 0, .4);
+  }
+
+  function s1c(t) { /* 14-20 */
+    var notes = document.querySelectorAll('#s1c .note');
+    for (var i = 0; i < notes.length; i++) {
+      var p = seg(t, +notes[i].dataset.at, +notes[i].dataset.at + .5);
+      notes[i].style.opacity = p;
+      notes[i].style.transform = 'translateX(' + (30 * (1 - p)) + 'px)';
+    }
+  }
+
+  function s2(t) { /* 20-30 */
+    var name = 'BetterFront';
+    var el = document.getElementById('s2logo');
+    var reveal = seg(t, .4, 2.0) * name.length;
+    var html = '';
+    for (var i = 0; i < name.length; i++) {
+      if (i < reveal) html += (i >= 6 ? '<em>' + name[i] + '</em>' : name[i]);
+      else html += '<span style="opacity:.25">' + name[i] + '</span>';
+    }
+    el.innerHTML = html;
+    var badges = document.querySelectorAll('#s2 .badge');
+    var at = [1.4, 1.8, 2.2, 2.6];
+    for (var j = 0; j < badges.length; j++) {
+      var p = seg(t, at[j], at[j] + .45);
+      badges[j].style.opacity = p;
+      badges[j].style.transform = 'translateY(' + (24 * (1 - p)) + 'px)';
+    }
+  }
+
+  function s3a(t) { /* 30-38 */
+    var rows = document.querySelectorAll('#s3a .row');
+    var at = [.4, .9, 1.4];
+    for (var i = 0; i < rows.length; i++) {
+      var p = seg(t, at[i], at[i] + .4);
+      rows[i].style.opacity = p; rows[i].style.transform = 'translateX(' + (40 * (1 - p)) + 'px)';
+    }
+    var cands = [document.getElementById('cand1'), document.getElementById('cand2'), document.getElementById('cand3')];
+    var ca = [2.4, 2.9, 3.4];
+    for (var j = 0; j < cands.length; j++) {
+      var q = seg(t, ca[j], ca[j] + .45);
+      cands[j].style.opacity = q; cands[j].style.transform = 'translateY(' + (36 * (1 - q)) + 'px)';
+    }
+    var sel = seg(t, 5.2, 5.7);
+    cands[1].classList.toggle('sel', sel > .5);
+  }
+
+  function s3b(t) { /* 38-46 */
+    var cmd = 'npx shadcn@latest add https://reactbits.dev/r/StarBorder-TS-TW';
+    var typed = cmd.slice(0, Math.floor(seg(t, .3, 2.5) * cmd.length));
+    var lines = ['<span class="cmd">' + typed + (seg(t, .3, 2.5) < 1 ? '<span class="caret"></span>' : '') + '</span>'];
+    if (t > 3.0) lines.push('<span class="ok">✔ Checking registry...</span>');
+    if (t > 4.0) lines.push('<span class="ok">✔ Created 1 file:  src/components/StarBorder.tsx</span>');
+    if (t > 5.0) lines.push('<span class="ok">✔ Installing dependencies...</span> <span class="cmd">gsap · motion</span>');
+    if (t > 6.2) lines.push('<span style="color:#71717a">变体 -TS-TW 由项目环境自动探测</span>');
+    document.getElementById('s3bBody').innerHTML = lines.join('<br/>');
+  }
+
+  function s4(t) { /* 46-66 */
+    var open = seg(t, .1, .9);
+    document.getElementById('paneL').style.transform = 'translateX(' + (-600 * (1 - open)) + 'px)';
+    document.getElementById('paneR').style.transform = 'translateX(' + (600 * (1 - open)) + 'px)';
+    document.getElementById('paneL').style.opacity = open;
+    document.getElementById('paneR').style.opacity = open;
+    var tags = document.querySelectorAll('#s4 .tag');
+    var tp = seg(t, 1.4, 1.9);
+    tags[0].style.opacity = tp; tags[1].style.opacity = tp;
+    document.querySelector('#s4 .pill').style.opacity = seg(t, 1.0, 1.4) * (1 - seg(t, 15, 16));
+    var drift = seg(t, 2.5, 18) * 1500;
+    document.getElementById('ifL').style.transform = 'scale(.5974) translateY(-' + drift + 'px)';
+    document.getElementById('ifR').style.transform = 'scale(.5974) translateY(-' + (drift * .55) + 'px)';
+  }
+
+  function s5(t) { /* 66-78 */
+    var cards = document.querySelectorAll('#s5 .card');
+    var targets = [217, 5, 23, 2];
+    var fmtv = [function (v) { return Math.round(v); }, function (v) { return Math.round(v); }, function (v) { return Math.round(v); }, function (v) { return Math.round(v); }];
+    var labels = ['n1', 'n2', 'n3', 'n4'];
+    for (var i = 0; i < cards.length; i++) {
+      var p = seg(t, .3 + i * .5, .85 + i * .5);
+      cards[i].style.opacity = p;
+      cards[i].style.transform = 'perspective(900px) rotateY(' + (70 * (1 - p)) + 'deg)';
+      var v = ease(seg(t, .45 + i * .5, 1.25 + i * .5)) * targets[i];
+      document.getElementById(labels[i]).textContent = fmtv[i](v);
+    }
+  }
+
+  function s6(t) { /* 78-90 */
+    var head = 'github.com/Qz-zhong/', tail = 'BetterFront-SKILL';
+    var n = Math.floor(seg(t, .3, 2.3) * (head.length + tail.length));
+    var el = document.getElementById('s6repo');
+    var html = head.slice(0, Math.min(n, head.length));
+    if (n > head.length) html += '<span class="accent">' + tail.slice(0, n - head.length) + '</span>';
+    el.innerHTML = html;
+    var press = seg(t, 5.0, 5.35);
+    var star = document.getElementById('s6star');
+    star.classList.toggle('pressed', press > 0 && press < 1);
+    star.style.opacity = seg(t, 3.4, 3.8);
+    document.querySelector('#s6 .slogan').style.opacity = seg(t, 7.2, 7.9);
+    /* 星标爆开粒子 */
+    var burst = document.getElementById('s6burst');
+    var tb = t - 5.35;
+    if (!burst.childNodes.length) for (var i = 0; i < 26; i++) burst.appendChild(document.createElement('i'));
+    var kids = burst.children;
+    for (var k = 0; k < kids.length; k++) {
+      var ang = (k / 26) * 6.2832, v = 120 + (k % 5) * 46;
+      var d = Math.max(0, tb) * v;
+      kids[k].style.opacity = tb > 0 ? Math.max(0, 1 - tb / 1.1) : 0;
+      kids[k].style.transform = 'translate(' + Math.cos(ang) * d + 'px,' + (Math.sin(ang) * d - tb * tb * 60) + 'px)';
+    }
+    document.getElementById('s6end').style.opacity = seg(t, 9.2, 10.2);
+    document.getElementById('s6end').style.visibility = t > 9.0 ? 'visible' : 'hidden';
+  }
+
+  /* ---------- 引擎 ---------- */
+  var playing = false, tCur = 0, lastTs = 0, started = false;
+  function render(t) {
+    drawStars(t);
+    for (var i = 0; i < SCENES.length; i++) {
+      var s = SCENES[i];
+      var active = t >= s.t0 && t < s.t1;
+      s.el.classList.toggle('on', active);
+      s.el.style.opacity = active ? Math.min(seg(t, s.t0, s.t0 + .3), 1 - seg(t, s.t1 - .3, s.t1)) : 0;
+      if (active) s.fn(t - s.t0);
+    }
+    renderSubs(t);
+    barFill.style.width = (t / DUR * 100) + '%';
+    timeEl.textContent = fmt(t) + ' / 01:30';
+  }
+  function tick(ts) {
+    if (playing) {
+      tCur += (ts - lastTs) / 1000;
+      if (tCur >= DUR) { tCur = DUR; playing = false; document.getElementById('btnPlay').textContent = '▶ 播放'; }
+      render(tCur);
+    }
+    lastTs = ts;
+    requestAnimationFrame(tick);
+  }
+  function play() { playing = true; document.getElementById('btnPlay').textContent = '⏸ 暂停'; document.getElementById('startOverlay').style.display = 'none'; }
+  function pause() { playing = false; document.getElementById('btnPlay').textContent = '▶ 播放'; }
+  function toggle() { playing ? pause() : play(); }
+
+  document.getElementById('btnPlay').addEventListener('click', toggle);
+  document.getElementById('btnReplay').addEventListener('click', function () { seek(0); play(); });
+  document.getElementById('startOverlay').addEventListener('click', play);
+  document.getElementById('bar').addEventListener('click', function (e) {
+    var r = this.getBoundingClientRect(); seek((e.clientX - r.left) / r.width * DUR);
+  });
+  addEventListener('keydown', function (e) {
+    if (e.code === 'Space') { e.preventDefault(); if (!started) play(); else toggle(); }
+    if (e.code === 'ArrowRight') seek(tCur + 5);
+    if (e.code === 'ArrowLeft') seek(tCur - 5);
+    if (e.key === 'r' || e.key === 'R') { seek(0); play(); }
+  });
+
+  function seek(t) { tCur = clamp(t, 0, DUR); if (!started) { started = true; } render(tCur); }
+
+  render(0);
+  requestAnimationFrame(tick);
+  if (qs.has('autoplay')) play();
+  if (qs.has('t')) { started = true; seek(parseFloat(qs.get('t'))); }
+})();
+</script>
+</body>
+</html>
