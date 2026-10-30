@@ -1,0 +1,90 @@
+{
+  "$comment": "BetterFront v1.7.0 统一词表。全部枚举唯一定义在本文件；scene-guide.md / theme-backgrounds.md / interactions.md / components.yaml / catalog.md「适用」列 / select.mjs 一律引用此处，禁止在文档中硬编码新词。新增枚举 = 改本文件 + 跑 node scripts/verify.mjs。",
+  "version": "1.7.0",
+  "site_type": {
+    "$comment": "站点类型，选型第一段过滤维度。id 为机器标识（components.yaml / select.mjs 使用），label 为中文展示名（文档表格使用）。",
+    "items": [
+      { "id": "industrial-dashboard", "label": "工业/监控/看板" },
+      { "id": "ai-product", "label": "AI 产品/大模型" },
+      { "id": "tech-media", "label": "科技媒体" },
+      { "id": "dev-tool", "label": "开发者工具/编程" },
+      { "id": "cybersecurity", "label": "网络安全" },
+      { "id": "data-bi", "label": "数据/BI/分析" },
+      { "id": "enterprise", "label": "企业官网" },
+      { "id": "finance", "label": "金融/金融科技" },
+      { "id": "healthcare", "label": "医疗/健康" },
+      { "id": "education", "label": "教育/知识" },
+      { "id": "ecommerce", "label": "电商/零售" },
+      { "id": "promo-campaign", "label": "电商大促/营销活动" },
+      { "id": "portfolio", "label": "作品集/设计" },
+      { "id": "news-media", "label": "资讯/媒体/门户" },
+      { "id": "gaming", "label": "游戏/电竞" },
+      { "id": "automotive", "label": "汽车/出行/物流" },
+      { "id": "space", "label": "太空/航天" },
+      { "id": "kids", "label": "儿童/益智" },
+      { "id": "eco-nature", "label": "环保/自然/户外" },
+      { "id": "music-party", "label": "音乐/娱乐/派对" },
+      { "id": "saas", "label": "SaaS 产品落地页" },
+      { "id": "product-launch", "label": "产品发布页" },
+      { "id": "fashion-luxury", "label": "时尚/奢侈品" },
+      { "id": "travel-hospitality", "label": "旅行/酒店" },
+      { "id": "food-lifestyle", "label": "餐饮/生活方式" }
+    ]
+  },
+  "region": {
+    "$comment": "页面区域代码，组件「适用」列 / components.yaml region[] 的取值域。",
+    "items": ["hero", "nav", "card", "gallery", "form", "background", "cursor", "transition", "list", "overlay"],
+    "labels": {
+      "hero": "Hero/主视觉标题",
+      "nav": "导航/菜单",
+      "card": "卡片容器",
+      "gallery": "画廊/图片展示",
+      "form": "表单/输入控件",
+      "background": "页面背景",
+      "cursor": "光标特效",
+      "transition": "转场/滚动进场",
+      "list": "列表/数据行",
+      "overlay": "浮层/装饰覆盖层"
+    }
+  },
+  "constraint": {
+    "$comment": "视觉约束枚举：select.mjs 第二段过滤维度，也是主题分析三步法的输出词表。",
+    "brightness": ["深底", "亮底", "皆可"],
+    "text_overlay": ["可叠字", "需留白", "须独立区"],
+    "text_overlay_query": ["可叠字", "需留白", "任意"],
+    "mobile_ratio": ["高", "低"],
+    "input": ["静态", "需鼠标", "触屏可降级"],
+    "background_mode": ["深底", "亮底", "任意"]
+  },
+  "legacy_mappings": {
+    "$comment": "v1.6.0 及以前两份文档的旧主题名 → site_type 的完全映射。允许一个旧名对应多个 site_type；不允许出现 items 之外的 id。verify.mjs 会断言：旧表出现过的每个主题名都在此映射中。",
+    "theme-backgrounds": {
+      "AI / 大模型 / 科技媒体": ["ai-product", "tech-media"],
+      "开发者工具 / 编程": ["dev-tool"],
+      "网络安全": ["cybersecurity"],
+      "数据 / BI / 分析": ["data-bi"],
+      "金融 / 金融科技": ["finance"],
+      "游戏 / 电竞": ["gaming"],
+      "汽车 / 出行 / 物流": ["automotive"],
+      "医疗 / 健康": ["healthcare"],
+      "教育 / 知识": ["education"],
+      "电商大促 / 营销活动": ["promo-campaign", "ecommerce"],
+      "作品集 / 设计师": ["portfolio"],
+      "资讯 / 媒体 / 门户": ["news-media"],
+      "企业官网（稳重）": ["enterprise"],
+      "环保 / 自然 / 户外": ["eco-nature"],
+      "音乐 / 娱乐 / 派对": ["music-party"],
+      "太空 / 航天": ["space"],
+      "儿童 / 益智": ["kids"]
+    },
+    "interactions": {
+      "工业 / 监控 / 看板": ["industrial-dashboard"],
+      "AI / 科技媒体": ["ai-product", "tech-media"],
+      "极客 / 开发者": ["dev-tool", "cybersecurity"],
+      "电商 / 活动": ["ecommerce", "promo-campaign"],
+      "作品集 / 设计": ["portfolio"],
+      "金融 / 企业官网": ["finance", "enterprise"],
+      "儿童 / 娱乐": ["kids", "music-party"]
+    }
+  }
+}

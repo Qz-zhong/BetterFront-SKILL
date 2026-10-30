@@ -3,6 +3,7 @@
 > 用途：用户要求"按钮/交互/转场更炫"或整页构建时，据此给出**交互组合候选**，经用户选择后落地。
 > 与 theme-backgrounds.md（背景）平行的姊妹篇，输出格式与交互停点规则完全一致。
 > 所有 CLI ID 均可在 [catalog.md](catalog.md) 核对；安装见 SKILL.md Step 3-4。
+> **词表约束**：页面主题一律使用 [taxonomy.json](taxonomy.json) 的 `site_type`；旧版 7 个交互主题已 100% 映射进 taxonomy（见 `legacy_mappings.interactions`）。精确 top3 运行 `node scripts/select.mjs --site-type <id> --mobile-ratio 高|低`。
 
 ## 1. 三大类组件清单
 
@@ -33,25 +34,25 @@
 
 ## 2. 交互强度分级（先定级别，再选组件）
 
-| 级别 | 适用页面 | 组合约束（硬性） |
+| 级别 | 适用页面（site_type） | 组合约束（硬性） |
 |---|---|---|
-| **点缀级** | 看板 / 后台 / 文档 | 1 种按钮强调（建议 Magnet）+ 1 套淡进场（FadeContent）；禁用花式转场 |
-| **强调级** | landing / 资讯 / 企业官网 | 1 种按钮强调 + 1 套进场（AnimatedContent）+ 全页 ≤1 处花式转场 |
-| **沉浸级** | 活动 / 发布 / 娱乐 | 按钮组 + 转场组 + 微交互组可同时用，仍受 pitfalls 性能红线约束 |
+| **点缀级** | 工业/监控/看板（industrial-dashboard）、企业官网（enterprise）、金融（finance） | 1 种按钮强调（建议 Magnet）+ 1 套淡进场（FadeContent）；禁用花式转场 |
+| **强调级** | SaaS 落地页（saas）、资讯/媒体（news-media）、AI 产品（ai-product） | 1 种按钮强调 + 1 套进场（AnimatedContent）+ 全页 ≤1 处花式转场 |
+| **沉浸级** | 电商大促（promo-campaign）、产品发布页（product-launch）、游戏（gaming）、音乐/派对（music-party） | 按钮组 + 转场组 + 微交互组可同时用，仍受 pitfalls 性能红线约束 |
 
-## 3. 主题 → 交互风格映射
+## 3. 站点类型 → 交互风格映射（site_type 统一词表）
 
-| 页面主题 | 按钮 | 转场/进场 | 微交互 | 总基调 |
+| site_type（label） | 按钮 | 转场/进场 | 微交互 | 总基调 |
 |---|---|---|---|---|
-| 工业 / 监控 / 看板 | `Magnet` | `FadeContent` | `SwipeToast` | 克制型（点缀级） |
-| AI / 科技媒体 | `StarBorder` | `AnimatedContent` | `CountUp` 联动 | 科技型（强调级） |
-| 极客 / 开发者 | `ElectricBorder` | `GlitchText` 标题联动 | `CodeSlots` | 终端型（强调级） |
-| 电商 / 活动 | `StarBorder` + `ClickSpark` | `PixelTransition` | `PeekRating` + `SwipeToast` | 热闹型（沉浸级） |
-| 作品集 / 设计 | `SpecularButton` | `FlipCard` / `MorphSlider` | `ElasticSlider` | 质感型（强调级） |
-| 金融 / 企业官网 | `Magnet` | `FadeContent` | `SlideCommit` | 稳重型（点缀级） |
-| 儿童 / 娱乐 | `SlingButton` | `BounceCards` | `JellyRadio` + `PulseHeart` | 趣味型（沉浸级） |
+| 工业/监控/看板（industrial-dashboard） | `Magnet` | `FadeContent` | `SwipeToast` | 克制型（点缀级） |
+| AI 产品/科技媒体（ai-product） | `StarBorder` | `AnimatedContent` | `CountUp` 联动 | 科技型（强调级） |
+| 极客/开发者（dev-tool） | `ElectricBorder` | `GlitchText` 标题联动 | `CodeSlots` | 终端型（强调级） |
+| 电商/大促活动（ecommerce · promo-campaign） | `StarBorder` + `ClickSpark` | `PixelTransition` | `PeekRating` + `SwipeToast` | 热闹型（沉浸级） |
+| 作品集/设计（portfolio） | `SpecularButton` | `FlipCard` / `MorphSlider` | `ElasticSlider` | 质感型（强调级） |
+| 金融/企业官网（finance · enterprise） | `Magnet` | `FadeContent` | `SlideCommit` | 稳重型（点缀级） |
+| 儿童/娱乐（kids · music-party） | `SlingButton` | `BounceCards` | `JellyRadio` + `PulseHeart` | 趣味型（沉浸级） |
 
-映射表未覆盖的主题：取最近领域行 + 按钮强度降一档（宁克制勿过度）。
+> 上表是**人工示例集**（v1.6 沿革），不再是唯一决策源。其余 18 个 site_type 的精确 top3 与移动端/桌面端变体，运行 `node scripts/select.mjs --site-type <id> --mobile-ratio 高|低`。映射表未覆盖的主题：取最近领域行 + 按钮强度降一档（宁克制勿过度）。
 
 ## 4. 输出格式（含强制交互停点）
 

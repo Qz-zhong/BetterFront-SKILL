@@ -4,8 +4,8 @@
 
 ## 1. 性能红线
 
-- **WebGL/shader 组件单页 ≤ 2 个**，移动端项目慎用。catalog 中带 ⚡WebGL 标记的组件已被脚本标记；此外背景类多数为 shader 实现（Aurora、Silk、Iridescence、LiquidChrome、Prism、Beams 等），使用前到组件文档页确认 Dependencies
-- three.js 系组件（Lanyard、ModelViewer、FluidGlass、Cubes、FlyingPosters、DecayCard、InfiniteMenu 等常见实现）安装体积大、GPU 开销高，单页至多 1 个展示位
+- **WebGL/shader 组件单页 ≤ 2 个**，移动端项目慎用。catalog 中带 ⚡WebGL 标记的组件由脚本按「依赖含 ogl/three ∪ 描述含 webgl/shader」自动标记（v1.7.0 规则，19 个）。注意：官方已将多数背景重写为**零 npm 依赖的内联 WebGL**（如 Aurora、Silk、Particles），它们可能无 ⚡ 标记但仍是 shader 实现 —— 背景类组件使用前一律按 components.yaml 的 `perf_cost` 与组件文档页确认性能预算
+- three.js 系组件（Lanyard、ModelViewer、Hyperspeed 等，deps 列已标 three）安装体积大、GPU 开销高，单页至多 1 个展示位
 - 背景组件用 `absolute` + 固定高度定位，不参与文档流，避免触发整页重排
 - 同页多个 WebGL 组件会受浏览器 WebGL 上下文数量限制，可能初始化失败
 
@@ -24,8 +24,9 @@
 
 ## 4. 兼容性红线
 
-- **光标跟随类组件在触屏设备上无效果**（SplashCursor、BlobCursor、GhostCursor、SwarmCursor、PixelTrail、ImageTrail、Ribbons 等），必须设计降级（如改 hover/点击触发）
-- **SSR / Next.js**：绝大多数组件需要 `"use client"`；three/ogl 系组件访问 `window`，需动态导入关闭 SSR（`next/dynamic` + `ssr: false`）
+- **光标跟随类组件在触屏设备上无效果**，必须设计降级（如改 hover/点击触发，或静态首帧呈现）。光标类组件（region 含 cursor）与 **46 个 cursor 驱动背景**的完整降级清单见 [theme-backgrounds.md 第 5 节](theme-backgrounds.md)；逐组件的输入模式见 components.yaml 的 `input` 字段（`静态` / `需鼠标` / `触屏可降级`），select 脚本在 `--mobile-ratio 高` 时会自动降权前两类
+- 完整清单见本文第 8 节，与 theme-backgrounds.md 第 5 节同源，verify.mjs 会逐个核对两者是否一致
+- **SSR / Next.js**：绝大多数组件需要 `"use client"`；WebGL 系组件访问 `window`，需动态导入关闭 SSR（`next/dynamic` + `ssr: false`）
 - React 18+ 项目注意 StrictMode 双挂载对动画初始化的影响，官方示例默认兼容，自行改造时留意清理函数
 
 ## 5. 许可与边界
@@ -50,3 +51,16 @@
 - **Vite dev 模式依赖发现竞态**：新装组件后 dev server 对新依赖（three/ogl）"按需发现"，浏览器可能随机白屏 + `net::ERR_ABORTED`；生产构建无此问题。**验证动效一律 `npm run build && npm run preview`**
 - **背景对比预览页**：一次只挂载一个背景（切换用整页跳转），避免多 WebGL 上下文互抢（方案见 theme-backgrounds.md 附录）
 - **镜像坏包**：npm 镜像偶发包不完整（如 create-vite 缺模板目录），报 ENOENT 时降版本重试（如 `npm create vite@8`）
+
+## 8. 触屏降级清单（cursor 驱动背景 46 个）
+
+与 [theme-backgrounds.md 第 5 节](theme-backgrounds.md)同源（同一份 catalog 官方描述推导，46/63 背景描述含 cursor）。触屏设备上光标交互**无效果**，移动端占比高时必须按以下原则处理：
+
+| 情况 | 处理 |
+|---|---|
+| 动效主体不依赖光标，触屏仅失去交互增强 | 可直接用；触屏端用 `matchMedia('(pointer: coarse)')` 停用指针监听，静态/自主动画首帧照常呈现 |
+| 交互即卖点（Ballpit 推球、LiquidEther 搅动等） | 移动端改用**静态首帧降级**或换低交互背景，并在交付说明中告知用户差异 |
+
+**清单（46 个）**：Antigravity, Aurora, Balatro, Ballpit, Beams, DarkVeil, Dither, DotField, DotGrid, FaultyTerminal, Ferrofluid, FloatingLines, FluxLines, Galaxy, GradientASCII, GradientBlinds, GradientWaves, Grainient, GridDistortion, Iridescence, LetterGlitch, Lightfall, Lightning, LightPillar, LightRays, LightTunnel, LiquidChrome, LiquidEther, MagicRings, MagnetLines, MoltenMetal, Orb, Particles, PixelBlast, PixelSnow, Plasma, PrismaticBurst, Scanner, ShapeGrid, SideRays, Silk, SlicedWaves, Threads, Topography, Waves, WebThreads
+
+> 逐组件的输入模式以 components.yaml 的 `input` 字段为准（`静态` / `需鼠标` / `触屏可降级`），select 脚本在 `--mobile-ratio 高` 时自动降权前两类。

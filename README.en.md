@@ -10,6 +10,12 @@
 
 **Unofficial community skill** — built on the open [Agent Skills](https://agentskills.io) spec. Makes your AI coding agent work like a senior engineer who knows every one of the 217 animated components in React Bits.
 
+> **v1.7.0 — rebuilt decision layer.** Selection moved from "list components by category" to a three-stage **site type → visual constraint → component** pipeline. All 217 components now enter the candidate pool (in v1.6 only 54/217 = 25% had any recommendation path). One command runs all consistency checks:
+> ```bash
+> node scripts/select.mjs --site-type saas --background-mode dark --mobile-ratio high
+> node scripts/verify.mjs   # 39 checks, exit 0
+> ```
+
 **中文文档**：[README.md](README.md)
 
 ---
@@ -20,8 +26,12 @@ Three failure modes when AI writes animated React pages:
 
 | Pain | BetterFront's answer |
 |---|---|
-| Hallucinated component names, wrong variant suffixes, missing deps | **217-component catalog snapshot** (auto-synced from the official data source), 38+ CLI IDs individually verified, JS/TS × CSS/Tailwind variant auto-detection |
+| Hallucinated component names, wrong variant suffixes, missing deps | **217-component catalog snapshot** (auto-synced from the official data source); the dependency column is **217/217 filled** (synced from the official registry, `-` when none); 19 ⚡WebGL flags derived by rule, not by hand; JS/TS × CSS/Tailwind variant auto-detection |
+| Only 54 of 217 components had any recommendation path — selection was guesswork | **Unified attribute pool + three-stage selector**: `components.yaml` (217 rows × 9 fields) × `select.mjs` (site type → constraints → intensity ranking); reproducible top-3 for all 25 site types × 4 constraint combos |
+| Each doc invented its own industry names, vocabularies never matched | **One vocabulary in `taxonomy.json`**: 25 site types / 10 regions / constraint enums; every legacy theme name in the three references is 100% mapped into it |
 | Guesswork selection — the user never gets a say | **Mandatory interaction checkpoints**: the AI only proposes "theme analysis → 2–4 candidates → local preview"; you decide |
+| Descriptions but no usage guidance | **`component-usage.md`**: import paths, required props, deps and real-world gotchas for the 31 most-used components |
+| Cursor-driven motion silently dies on touch devices | **Touch degradation list**: the 46 cursor-driven backgrounds called out explicitly ("no effect on touch / needs static first-frame fallback"), in both theme-backgrounds and pitfalls |
 | The generic "AI slop" look | **9-item anti-template blacklist + 14-item layout checklist** (inspired by top-rated GitHub design skills), plus a mandatory design contract before coding |
 
 ## Before / After — same prompt, with and without the skill
@@ -54,11 +64,14 @@ Open [demo/comparison/before.html](demo/comparison/before.html) and [demo/compar
 
 | Capability | What it does |
 |---|---|
+| 🧭 Three-stage selection | Site type (25) → visual constraints (dark/light, mobile share, text overlay) → intensity ranking; returns a top-3 with match reasons |
 | 🎨 Background theme matching | Three-step theme analysis (domain + mood + constraints) → candidate backgrounds with concrete color parameters |
 | 🖱️ Interaction selection | Buttons / transitions / micro-interactions bundled at three intensity tiers (subtle / accent / immersive) |
-| 📐 Layout discipline | Design contract → skeleton recipes (dashboard 22:52:26 etc.) → 8pt spacing → 1.25 type scale → 60-30-10 color |
+| 📐 Layout discipline | Design contract → skeleton recipes as **ranges + trigger conditions** (e.g. portfolio header 40–70vh) → 8pt spacing → 1.25 type scale → 60-30-10 color |
+| 📖 Component usage notes | Import paths, required props, deps and tested gotchas for the 31 most-used components |
 | ✅ Dual-resolution verification | 1920×1080 + 1366×768 screenshot self-check for both motion and layout |
-| 🔄 Auto-syncing catalog | One command refreshes the component catalog and flags any stale component references |
+| 🔄 Auto-syncing catalog | One command refreshes the component catalog and deps, and flags any stale component references |
+| 🔍 One-command consistency check | `node scripts/verify.mjs` runs all 39 checks across 7 groups (data layer / vocabulary / attribute pool / selector / skeletons / touch list) — green means shippable |
 
 ## Install
 

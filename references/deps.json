@@ -1,0 +1,438 @@
+{
+  "syncedAt": "2026-10-30",
+  "deps": {
+    "ASCIIText": [],
+    "BlurText": [
+      "motion"
+    ],
+    "CircularText": [
+      "motion"
+    ],
+    "CountUp": [
+      "motion"
+    ],
+    "CurvedLoop": [],
+    "DecryptedText": [
+      "motion"
+    ],
+    "DepthText": [],
+    "EchoText": [],
+    "FallingText": [
+      "matter-js"
+    ],
+    "FoldText": [
+      "gsap"
+    ],
+    "FuzzyText": [],
+    "GlitchText": [],
+    "GradientText": [],
+    "MaskedHeading": [
+      "gsap"
+    ],
+    "ParticleText": [],
+    "RotatingText": [
+      "motion"
+    ],
+    "ScrambledText": [
+      "gsap"
+    ],
+    "ScrollFloat": [
+      "gsap"
+    ],
+    "ScrollReveal": [
+      "gsap"
+    ],
+    "ScrollVelocity": [
+      "motion"
+    ],
+    "ShinyText": [],
+    "Shuffle": [
+      "gsap",
+      "@gsap/react"
+    ],
+    "SplitFlapText": [],
+    "SplitText": [
+      "gsap",
+      "@gsap/react"
+    ],
+    "StrokeText": [
+      "gsap"
+    ],
+    "TechText": [],
+    "TextCursor": [],
+    "TextLoop": [
+      "gsap"
+    ],
+    "TextPressure": [],
+    "TextType": [
+      "gsap"
+    ],
+    "TrueFocus": [
+      "motion"
+    ],
+    "VariableProximity": [],
+    "WarpText": [
+      "ogl"
+    ],
+    "AnimatedContent": [
+      "gsap"
+    ],
+    "BlobCursor": [
+      "three"
+    ],
+    "ClickSpark": [],
+    "Crosshair": [],
+    "CrystalizedBall": [
+      "ogl"
+    ],
+    "Cubes": [],
+    "CursorGrid": [],
+    "DitherVeil": [
+      "ogl"
+    ],
+    "ElasticMesh": [],
+    "ElectricBorder": [],
+    "ElectricLogo": [
+      "ogl"
+    ],
+    "FadeContent": [
+      "gsap"
+    ],
+    "GhostCursor": [],
+    "GlareHover": [],
+    "GlowCursor": [],
+    "GradualBlur": [],
+    "HalftoneReveal": [],
+    "ImageTrail": [
+      "gsap"
+    ],
+    "LaserFlow": [],
+    "LogoLoop": [],
+    "Magnet": [],
+    "MetaBalls": [],
+    "MetallicPaint": [],
+    "Noise": [],
+    "OrbitImages": [],
+    "PixelSwap": [],
+    "PixelTrail": [],
+    "PixelTransition": [],
+    "Ribbons": [],
+    "RippleDistortion": [
+      "ogl"
+    ],
+    "ScrollExpand": [],
+    "ShapeBlur": [],
+    "SplashCursor": [],
+    "StarBorder": [],
+    "StickerPeel": [],
+    "Strands": [],
+    "SwarmCursor": [],
+    "TargetCursor": [
+      "react-dom"
+    ],
+    "AccordionGallery": [
+      "gsap"
+    ],
+    "AnimatedList": [
+      "@hugeicons/react",
+      "@hugeicons/core-free-icons"
+    ],
+    "BorderGlow": [],
+    "BounceCards": [],
+    "BubbleMenu": [
+      "gsap"
+    ],
+    "CardNav": [
+      "@hugeicons/react",
+      "@hugeicons/core-free-icons"
+    ],
+    "CardSwap": [
+      "@hugeicons/react",
+      "@hugeicons/core-free-icons"
+    ],
+    "Carousel": [
+      "@hugeicons/react",
+      "@hugeicons/core-free-icons"
+    ],
+    "ChromaGrid": [],
+    "CircularCarousel": [],
+    "CircularGallery": [],
+    "Counter": [],
+    "CurvedInput": [],
+    "DecayCard": [],
+    "DepthCarousel": [
+      "gsap"
+    ],
+    "Dock": [
+      "react-dom"
+    ],
+    "DomeGallery": [
+      "@use-gesture/react"
+    ],
+    "DriftWall": [],
+    "ElasticSlider": [
+      "@hugeicons/react",
+      "@hugeicons/core-free-icons"
+    ],
+    "FlexCarousel": [
+      "ogl"
+    ],
+    "FlowingMenu": [
+      "@hugeicons/react",
+      "@hugeicons/core-free-icons"
+    ],
+    "FluidGlass": [],
+    "FlyingPosters": [],
+    "Folder": [],
+    "GlassIcons": [],
+    "GlassSurface": [],
+    "GooeyNav": [],
+    "HoloCard": [],
+    "InfiniteMenu": [],
+    "InfiniteSpiral": [],
+    "Lanyard": [
+      "three"
+    ],
+    "LineSidebar": [],
+    "MagicBento": [
+      "@hugeicons/react",
+      "@hugeicons/core-free-icons"
+    ],
+    "Masonry": [
+      "react-dom",
+      "@hugeicons/react",
+      "@hugeicons/core-free-icons"
+    ],
+    "ModelViewer": [
+      "@react-three/fiber",
+      "@react-three/drei",
+      "three"
+    ],
+    "MorphSlider": [
+      "ogl",
+      "gsap"
+    ],
+    "OptionWheel": [],
+    "PillNav": [],
+    "PixelCard": [],
+    "ProfileCard": [
+      "@hugeicons/react",
+      "@hugeicons/core-free-icons"
+    ],
+    "ReflectiveCard": [
+      "@hugeicons/react",
+      "@hugeicons/core-free-icons"
+    ],
+    "ScrollStack": [],
+    "SpecularButton": [],
+    "SpotlightCard": [],
+    "Stack": [
+      "motion"
+    ],
+    "StaggeredMenu": [
+      "gsap"
+    ],
+    "Stepper": [
+      "@hugeicons/react",
+      "@hugeicons/core-free-icons"
+    ],
+    "TiltedCard": [],
+    "BellToggle": [
+      "motion",
+      "@hugeicons/react",
+      "@hugeicons/core-free-icons"
+    ],
+    "BranchedMenu": [
+      "@hugeicons/react",
+      "@hugeicons/core-free-icons"
+    ],
+    "CallChip": [
+      "@hugeicons/react",
+      "@hugeicons/core-free-icons"
+    ],
+    "CodeSlots": [
+      "motion",
+      "@hugeicons/react",
+      "@hugeicons/core-free-icons"
+    ],
+    "CometDial": [
+      "motion"
+    ],
+    "DodgeField": [
+      "motion"
+    ],
+    "FlipCard": [
+      "motion"
+    ],
+    "FlyingButton": [],
+    "FolderFloat": [
+      "matter-js"
+    ],
+    "FuseButton": [
+      "@hugeicons/react",
+      "@hugeicons/core-free-icons"
+    ],
+    "GlideSelect": [
+      "@hugeicons/react",
+      "@hugeicons/core-free-icons"
+    ],
+    "HoldButton": [],
+    "JellyRadio": [
+      "motion"
+    ],
+    "LatticeLoader": [],
+    "PaperCrumple": [
+      "three"
+    ],
+    "PeekRating": [
+      "@hugeicons/react",
+      "@hugeicons/core-free-icons"
+    ],
+    "PromptBar": [
+      "motion",
+      "@hugeicons/react",
+      "@hugeicons/core-free-icons"
+    ],
+    "PulseHeart": [
+      "@hugeicons/core-free-icons"
+    ],
+    "RefineFrame": [
+      "@hugeicons/react",
+      "@hugeicons/core-free-icons"
+    ],
+    "RubberSegment": [
+      "motion"
+    ],
+    "ScrubField": [
+      "motion"
+    ],
+    "Shredder": [
+      "react-dom"
+    ],
+    "SlideCommit": [
+      "motion",
+      "@hugeicons/react",
+      "@hugeicons/core-free-icons"
+    ],
+    "SlingButton": [
+      "motion",
+      "@hugeicons/react",
+      "@hugeicons/core-free-icons"
+    ],
+    "SloshGauge": [],
+    "SpringCheck": [
+      "motion",
+      "@hugeicons/core-free-icons"
+    ],
+    "SquishSwitch": [
+      "motion"
+    ],
+    "StatusMark": [
+      "motion"
+    ],
+    "SwipeRow": [
+      "motion",
+      "@hugeicons/react",
+      "@hugeicons/core-free-icons"
+    ],
+    "SwipeToast": [
+      "motion",
+      "@hugeicons/react",
+      "@hugeicons/core-free-icons"
+    ],
+    "TearTicket": [
+      "motion"
+    ],
+    "ThoughtLine": [
+      "motion",
+      "@hugeicons/react",
+      "@hugeicons/core-free-icons"
+    ],
+    "VoicePill": [
+      "@hugeicons/react",
+      "@hugeicons/core-free-icons"
+    ],
+    "WakeSlider": [
+      "motion"
+    ],
+    "WarmTooltip": [
+      "react-dom",
+      "motion"
+    ],
+    "AcidSquares": [],
+    "AeroShards": [
+      "vgpu"
+    ],
+    "Antigravity": [],
+    "Aurora": [],
+    "Balatro": [],
+    "Ballpit": [],
+    "Beams": [],
+    "ColorBends": [
+      "three"
+    ],
+    "CRTWarp": [],
+    "DarkVeil": [],
+    "Dither": [],
+    "DotField": [],
+    "DotGrid": [],
+    "FaultyTerminal": [],
+    "Ferrofluid": [],
+    "FloatingLines": [],
+    "FluxLines": [],
+    "Galaxy": [],
+    "GhostFibers": [],
+    "GradientASCII": [],
+    "GradientBlinds": [],
+    "GradientWaves": [],
+    "Grainient": [],
+    "GridDistortion": [],
+    "GridMotion": [],
+    "GridScan": [],
+    "Hyperspeed": [
+      "three"
+    ],
+    "Iridescence": [],
+    "LetterGlitch": [],
+    "Lightfall": [],
+    "Lightning": [],
+    "LightPillar": [],
+    "LightRays": [],
+    "LightTunnel": [],
+    "LineWaves": [],
+    "LiquidChrome": [],
+    "LiquidEther": [],
+    "MagicRings": [],
+    "MagnetLines": [],
+    "MicroSlats": [
+      "ogl"
+    ],
+    "MoltenMetal": [],
+    "Orb": [],
+    "Particles": [],
+    "PatternWaves": [
+      "ogl"
+    ],
+    "PixelBlast": [],
+    "PixelSnow": [],
+    "Plasma": [],
+    "PlasmaWave": [],
+    "Prism": [],
+    "PrismaticBurst": [],
+    "Radar": [],
+    "RippleGrid": [],
+    "Scanner": [],
+    "ShapeGrid": [],
+    "ShapeWaves": [
+      "vgpu"
+    ],
+    "SideRays": [],
+    "Silk": [],
+    "SlicedWaves": [],
+    "SoftAurora": [],
+    "Threads": [],
+    "Topography": [],
+    "Waves": [],
+    "WebThreads": []
+  }
+}
