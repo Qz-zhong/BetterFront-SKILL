@@ -93,22 +93,25 @@ Then just tell your agent: *"build me a landing page for X"* — the skill steps
 **Zero-dependency core**: all decision knowledge is plain static files — `catalog.md` (217 components), `taxonomy.json` (shared vocabulary), `components.yaml` (217×9 attribute pool), the layout rules and the anti-template blacklist.
 Any agent that can read a file can run the full 5-step workflow — **no Node, no MCP, no network, no vendor-specific API**. That is exactly why it works across agents.
 
-The four items below are **accelerators** (they turn minutes of manual work into one command). If one is unavailable you take the alternate path.
-**The candidate pool is identical** — same taxonomy, same `components.yaml`, so script and hand-filtering yield the same set
-(measured: for the space/aerospace theme both produce 11 candidates, with `WarpText` ranked first in both).
-Ranking differs slightly: the script scores on multiple axes (visual intensity + theme specificity ×1.6 + region priority + constraint penalties),
-while the manual path sorts by `visual_intensity` desc and drops anything flagged in `avoid_when` — same direction, **possibly a different order**, but always inside the same pool:
+The four items below are **accelerators** (they turn minutes of manual work into one command). The order is always
+**run the best path first, fall back only when it actually fails** — do not probe the environment up front: Node may exist but be older than 18,
+npx may exist while offline, a browser tool may exist without chromium installed. **A real error is a certain signal; a prediction is not.**
+The only exception is project config (`package.json` / `components.json` / `tsconfig.json`) — that is information gathering and must be read actively.
 
-| Accelerator | Missing when | Alternate path (same outcome) |
+| Accelerator | ① Preferred | ② Failure signal → ③ Fallback |
 |---|---|---|
-| Node.js (≥18) to run `scripts/select.mjs` | no Node in the environment | Read `taxonomy.json` to fix site_type → filter matching rows in `components.yaml` → rank top 3 by `visual_intensity` / `avoid_when` |
-| MCP / registry channel | no MCP configured | Channel B: `npx shadcn@latest add ...` CLI; if npx is unavailable too → channel C, copy source manually |
-| Browser automation | no screenshots | Give `npm run dev` instructions + an expected-effects checklist and ask the user to eyeball it |
-| Network | offline | The 217-component catalog, deps and attribute pool are all vendored here (only `sync-catalog.mjs` needs network) |
+| Selection: Node (≥18) running `scripts/select.mjs` | `node scripts/select.mjs --site-type <id> ...` | `node: not found` / version <18 → read `taxonomy.json` to fix site_type, filter matching rows in `components.yaml`, sort by `visual_intensity` desc and drop `avoid_when` hits |
+| Install: MCP / registry channel | Channel A: install via MCP | MCP tool missing / registry not configured → Channel B: `npx shadcn@latest add ...`; if that fails too → Channel C, copy source manually |
+| Verify: browser automation | Start dev server → 1920×1080 + 1366×768 screenshots | No browser tool / missing chromium → give `npm run dev` instructions + an expected-effects checklist and ask the user to eyeball it |
+| Sync: network | `node scripts/sync-catalog.mjs` | fetch failed / timeout → keep going with the vendored 217 catalog + `deps.json`; the workflow does not stop |
+
+Fallback means **a different path**, not a lost feature. Measured fallback fidelity: for the space/aerospace theme the script and a hand-run
+`grep -w space` produce **the same pool of 11 candidates**, with `WarpText` first in both. The only difference is ordering inside the top 3 —
+the script scores on multiple axes (visual intensity + theme specificity ×1.6 + region priority + constraint penalties), while the manual path only approximates it.
 
 ⚠️ This table describes the **host runtime environment** (is Node installed, is MCP configured, can it screenshot, is there network) —
 a dimension that is **orthogonal** to "which agent you use". Nothing here is a capability only one particular agent has,
-so taking an alternate path is not a lost feature and does not weaken cross-agent portability.
+so taking a fallback path is not a lost feature and does not weaken cross-agent portability.
 
 ## Compatibility
 

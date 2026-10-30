@@ -93,22 +93,24 @@ git clone https://github.com/Qz-zhong/BetterFront-SKILL .trae/skills/betterfront
 **零依赖内核**：本 skill 的全部决策知识都是静态文件 —— `catalog.md`（217 组件目录）、`taxonomy.json`（统一词表）、`components.yaml`（217×9 属性池）、排版规范、反模板黑名单。
 任何能读文件的 Agent 都能跑完五步工作流，**不需要 Node、不需要 MCP、不需要联网、不调用任何 Agent 的私有 API**。这是它能跨 Agent 通用的原因。
 
-下面四项是**加速层**（把分钟级手工活变成秒级命令），缺失时走备选路径。
-**候选池完全一致** —— 同一份 taxonomy、同一份 components.yaml，脚本与手工筛出的是同一个集合
-（实测：太空/航天主题下两者都得到 11 个候选，第一顺位同为 `WarpText`）。
-top3 排序脚本用多维加权（视觉强度 + 主题特化 ×1.6 + 区域优先级 + 约束加减分），
-手工按 `visual_intensity` 降序 + `avoid_when` 排除，方向同向、**位次可能有个别差异**，但都落在同一候选池内：
+下面四项是**加速层**（把分钟级手工活变成秒级命令）。执行顺序是**先跑最优路径，撞墙了再退兜底** ——
+不要预先探测环境：`node` 在但版本 <18、npx 在但离线、浏览器工具在但没装 chromium，**预探测都会误判，真实报错才是确定信号**。
+唯一例外是项目配置（`package.json` / `components.json` / `tsconfig.json`），那是获取信息，必须主动读。
 
-| 加速能力 | 缺失时的环境 | 备选路径（结论一致） |
+| 加速能力 | ① 优先执行 | ② 失败信号 → ③ 兜底路径 |
 |---|---|---|
-| Node.js（≥18）跑 `scripts/select.mjs` | 环境无 Node | 手工读 `taxonomy.json` 定 site_type → 在 `components.yaml` 筛命中行 → 按 `visual_intensity` / `avoid_when` 排 top3 |
-| MCP / registry 通道 | 无 MCP 配置 | 通道 B：`npx shadcn@latest add ...` CLI；npx 也不可用 → 通道 C 手动复制源码 |
-| 浏览器自动化 | 截不了图 | 给 `npm run dev` 指引 + 预期效果清单，请用户肉眼确认 |
-| 网络 | 离线 | 217 组件目录 / 依赖 / 属性池全部内置，离线可完成选型与编码（仅 `sync-catalog.mjs` 拉最新目录需联网） |
+| 选型：Node（≥18）跑 `scripts/select.mjs` | `node scripts/select.mjs --site-type <id> ...` | `node: not found` / 版本 <18 → 手工读 `taxonomy.json` 定 site_type，在 `components.yaml` 筛命中行，按 `visual_intensity` 降序 + `avoid_when` 排除取 top3 |
+| 安装：MCP / registry 通道 | 通道 A：MCP 直接装 | MCP 工具不存在 / registry 未配置 → 通道 B：`npx shadcn@latest add ...`；再失败 → 通道 C 手动复制源码 |
+| 验证：浏览器自动化 | 起 dev server → 1920×1080 + 1366×768 双档截图 | 无浏览器工具 / 缺 chromium → 给 `npm run dev` 指引 + 预期效果清单，请用户肉眼确认 |
+| 同步：网络 | `node scripts/sync-catalog.mjs` | fetch 失败 / 超时 → 用内置 217 目录 + `deps.json` 继续，工作流不中断 |
+
+兜底不是砍功能，是**换路径**。实测兜底保真度：太空/航天主题下脚本与手工 `grep -w space`
+得到**同一个 11 个候选池**，第一顺位同为 `WarpText`；差异只在 top3 位次 ——
+脚本用多维加权（视觉强度 + 主题特化 ×1.6 + 区域优先级 + 约束加减分），手工按强度降序只能逼近，方向同向、位次可能有个别差异。
 
 ⚠️ 这张表描述的是**宿主运行时环境**（装没装 Node、有没有 MCP、能不能截图、联不联网），
 与"用哪款 Agent"是两个**正交**维度 —— 表里没有任何一项是"只有某某 Agent 才有"的能力，
-所以"走备选路径"不等于"功能被砍掉"，更不等于"不能跨 Agent 通用"。
+所以"走兜底路径"不等于"功能被砍掉"，更不等于"不能跨 Agent 通用"。
 
 ## 兼容性
 

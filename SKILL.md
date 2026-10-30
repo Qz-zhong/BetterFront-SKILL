@@ -1,12 +1,12 @@
 ---
 name: betterfront
-version: 1.7.2
+version: 1.7.3
 description: BetterFront — 让 AI 写出更有"人味"的动效前端。当用户在 React 项目中要求动画组件、炫酷背景、文本动效、微交互、创意画廊/导航/卡片或 landing page，或提到 React Bits / reactbits.dev / BetterFront 时使用。Use when the user wants animated React UI, creative backgrounds, text animations, micro-interactions, or mentions React Bits or BetterFront. 不适用于 Vue / 小程序 / 非 React 框架。
 ---
 
 # BetterFront · AI 动效前端开发
 
-> 版本：v1.7.2（变更记录见文末）
+> 版本：v1.7.3（变更记录见文末）
 > 组件能力基于开源库 [React Bits](https://www.reactbits.dev)（217 组件快照，致敬见开源 README Credits）
 
 BetterFront 让 AI 编程助手像资深工程师一样使用 React Bits 动效组件库（文本动画 / 动画 / 组件 / 微交互 / 背景五大类，每个组件有 JS|TS × CSS|Tailwind 四种变体）：内置全量组件目录快照 + 统一属性池 + 三段式选型脚本，按「站点类型 → 视觉约束 → 组件」决策，并强制"AI 给候选、用户拍板"的选型停点。
@@ -67,6 +67,7 @@ node scripts/select.mjs --site-type <id> --background-mode 深底|亮底|任意 
 ```
 
    脚本三段式：①站点类型过滤（components.yaml 217 组件全量池）→ ②约束过滤（深/亮底、移动端降权、叠字）→ ③强度排序，输出 top3（含 CLI ID、命中理由、命中的约束、慎用反例）
+   **直接执行，不要先探测 Node 在不在**；仅在真跑失败（`node: not found` / 版本 <18 / 脚本报错）时才切[第 7 节](#7-执行顺序优先路径--失败兜底)兜底路径手工筛选
 3. **区域性微调** → 参照 `references/scene-guide.md` 的开放示例集做组合；精确/生僻需求 → 在 `references/catalog.md` 按关键词检索
 4. **输出格式固定为：1 个推荐 + 2 个备选（取自脚本 top3 与池内次优），各附一句话理由**，并给出每个候选的 CLI ID 与分类
 5. 铁律：**禁止虚构组件名**。catalog 中没有的组件 = 不存在；所有候选都不合适时明确告知，并给出原生 CSS / 常规实现的替代方案
@@ -128,9 +129,8 @@ npx jsrepo@latest add https://reactbits.dev/r/<CliId>-<VARIANT>
 
 1. **用法**：抓取组件文档页 `https://www.reactbits.dev/<category>/<slug>`（slug 为 catalog 中 URL 的路径部分）获取 Props 表与示例；源码级问题查 `https://github.com/DavidHDev/react-bits`
 2. **排版与设计契约（写码前 → 交付前）**：读 `references/layout-guide.md` —— 写码前先产出 4 行设计契约（色板 4~6 个命名 hex / 字体家族与角色 ≤2 / 布局一句话 + ASCII 线框 / 本页"大胆只用在一处"的元素）；交付前逐条过 **14 条排版自查清单**，并对照**反模板黑名单**做"AI 味"检查
-3. **验证**：
-   - 当前环境具备浏览器自动化能力：起 dev server（或 `build && preview`，更稳）→ **1920×1080 与 1366×768 双档截图** → 确认动画真实生效 + 排版自查通过
-   - 不具备：给用户 `npm run dev` 指引与预期效果清单，请用户确认
+3. **验证（先试后退）**：**直接尝试**起 dev server（或 `build && preview`，更稳）→ **1920×1080 与 1366×768 双档截图** → 确认动画真实生效 + 排版自查通过。
+   不要预先判断"能不能截图"；仅在真的失败（无浏览器工具 / 报缺 chromium / server 起不来）时才切兜底：给用户 `npm run dev` 指引与预期效果清单，请用户确认（见第 7 节）
 4. **不生效排查顺序**：import 路径 → 必需 props → 依赖版本 → 对照官方源码逐行核对
 
 ## 3. 整页构建模式
@@ -170,26 +170,35 @@ node scripts/verify.mjs         # 一条命令跑完全部一致性校验，exit
 
 MIT + Commons Clause：组件可自由用于个人与商业项目，但**不得将组件本身单独出售或再分发**。免费库与 React Bits Pro 是两个独立 registry，Pro 安装命令需要 license key，禁止混用。
 
-## 7. 环境降级（加速层缺失时的备选路径）
+## 7. 执行顺序：优先路径 → 失败兜底
 
 **先分清两个维度**：本 skill 的决策知识全是静态文件（`catalog.md` / `taxonomy.json` / `components.yaml` / 排版规范 / 反模板黑名单），
 这是**零依赖内核** —— 不需要 Node、不需要 MCP、不需要联网、不调用任何 Agent 的私有 API，任何能读文件的 Agent 都能跑完工作流。
-下面四项只是**加速层**（把手工活变成一条命令），缺失时换一条路走，**选型结论完全一致**。
-「降级」在这里指的是**换路径**，不是**砍功能**；且它描述的是宿主运行时环境，与用哪款 Agent 正交 —— 不要把它理解成"只能在某类环境用"。
+下面四项只是**加速层**（把手工活变成一条命令）。
 
-四类环境缺失时按下表走备选路径，**不要因为环境不全就跳过工作流**：
+**执行铁律（先试后退）：每一项都先跑最优路径，撞墙了再退兜底，不要预先探测环境。**
 
-| 缺失 | 降级做法 |
-|---|---|
-| **Node.js**（跑不了 `scripts/select.mjs`） | 直接读 `references/taxonomy.json` 定 site_type 与约束 → 在 `references/components.yaml` 里筛 `site_type` 命中的行（例：`grep -w space` 得 11 个，与脚本候选池 11 完全一致）→ 按 `visual_intensity` 降序排、用 `avoid_when` 排除不合约束的 → top3。脚本用多维加权打分，**手工只能逼近、位次可能有个别差异**，但候选池相同、结论方向一致，只是慢一点 |
-| **MCP / registry 通道** | 用通道 B（CLI）`npx shadcn@latest add https://reactbits.dev/r/<CliId>-<VARIANT>`；npx 也不可用则通道 C 手动复制源码 |
-| **浏览器自动化**（截不了图） | 给用户 `npm run dev` 指引 + 预期效果清单（哪个区域该有什么动效、叠字是否可读、1366 宽是否溢出），请用户肉眼确认 |
-| **网络** | 217 组件目录 / 依赖 / 属性池全部内置在本目录，离线可完成选型与编码；只有 `sync-catalog.mjs` 拉最新目录需要联网 |
+- 为什么不能先探测：预探测会误判 —— `node` 存在但版本 <18、npx 存在但离线、浏览器工具存在但没装 chromium；
+  而**真实报错是确定的信号**。预探测还多花一轮工具调用，且容易因为"猜环境不行"而白白放弃更优路径。
+- 例外：**项目配置类必须主动读**（`package.json` / `components.json` / `tsconfig.json`）—— 那是获取信息，不是探测环境。
 
-铁律：**任何降级都必须在回复中说明"因为 X 不可用，改用 Y"**，不要静默降低质量。
+| 加速能力 | ① 优先执行 | ② 失败信号（看到就立刻切兜底） | ③ 兜底路径 |
+|---|---|---|---|
+| **选型**（Step 2） | `node scripts/select.mjs --site-type <id> ...` | `command not found` / `node: not found` / 版本 <18 / 脚本本身报错 | 读 `taxonomy.json` 定 site_type → 在 `components.yaml` 里筛 `site_type` 命中的行（例：`grep -w space` 得 11 个，与脚本候选池 11 完全一致）→ 按 `visual_intensity` 降序排、用 `avoid_when` 排除不合约束的 → top3。脚本用多维加权打分，**手工只能逼近、位次可能有个别差异**，但候选池相同、结论方向一致 |
+| **安装**（Step 4） | 通道 A：MCP 直接装 `<CliId>-<VARIANT>` | MCP 工具不存在 / 报 registry 未配置 | 通道 B：`npx shadcn@latest add https://reactbits.dev/r/<CliId>-<VARIANT>` → 若 npx 也不可用或网络失败 → 通道 C 手动复制源码 |
+| **验证**（Step 5） | 起 dev server（或 `build && preview`）→ **1920×1080 与 1366×768 双档截图** | 无浏览器工具 / 截图报缺 chromium / dev server 起不来 | 给用户 `npm run dev` 指引 + 预期效果清单（哪个区域该有什么动效、叠字是否可读、1366 宽是否溢出），请用户肉眼确认 |
+| **同步目录**（第 5 节） | `node scripts/sync-catalog.mjs` | fetch 失败 / 超时 / DNS 报错 | 直接用内置的 217 组件目录 + `deps.json` 继续（只是非最新），**工作流不中断** |
+
+两条铁律：
+
+1. **不要因为"猜环境可能不行"就跳过工作流** —— 先试，失败了再退。
+2. **任何兜底都必须在回复中说明"因为 X 不可用，改用 Y"**，不要静默降低质量。
+
+「降级」在这里指**换路径**，不是**砍功能**；这张表描述的是宿主运行时环境，与用哪款 Agent 正交 —— 不要理解成"只能在某类环境用"。
 
 ## 变更记录
 
+- **v1.7.3（2026-10-30）**：**执行顺序改为「先试最优 → 撞墙再退」** —— 原第 7 节是「缺失 → 降级做法」静态对照表，Step 5 用的是「先判断能不能截图、再决定怎么验证」的预探测（LBYL）句式，会导致 Agent 因猜错环境而白白放弃更优路径。改为：① 第 7 节表格扩为三段式「优先执行 / 失败信号 / 兜底路径」，每项给出真实失败信号（`node: not found`、缺 chromium、fetch 超时等），不再依赖猜测；② 明确 EAFP 铁律——不要预先探测运行时环境（`node` 在但 <18、npx 在但离线、浏览器工具在但没装 chromium，预探测都会误判），例外是项目配置类（package.json / components.json / tsconfig.json）必须主动读，那是获取信息不是探测；③ Step 2 / Step 5 就地内联兜底锚点，兜底指引不再只存在于第 7 节；Step 4 本就是 A→B→C 优先级链，保持不变；④ verify.mjs 新增第 8 组「执行顺序契约」7 项断言（三段式表头 / 四项能力齐全 / 先试后退铁律 / 三步各含兜底锚点 / Step 5 不再出现预探测句式），46 项全绿
 - **v1.7.2（2026-10-30）**：**澄清「降级」语义** —— 第 7 节与中英 README 明确区分两个正交维度：决策知识是**零依赖内核**（静态文件，任何能读文件的 Agent 都能跑完五步，无需 Node/MCP/网络/私有 API），Node 脚本 / MCP 通道 / 浏览器自动化 / 网络四项只是**加速层**，缺失时换备选路径且**选型结论一致**；补充「降级 = 换路径，不是砍功能；宿主运行时环境与 Agent 品牌正交」的说明，消除「无法跨 Agent 通用」的误读
 - **v1.7.1（2026-10-30）**：**跨 Agent 通用性** —— 新增第 7 节「环境降级」：明确 Node 缺失（手工查 components.yaml）/ MCP 缺失（CLI 兜底）/ 浏览器自动化缺失（指引 + 预期效果清单）/ 离线（217 组件快照内置）四种情况下的降级路径，并要求在回复中显式说明降级原因；README 安装地址占位符 `github.com/<you>/...` 修正为真实仓库 `github.com/Qz-zhong/BetterFront-SKILL`，中英双语新增「跨 Agent 通用性」对照表。技能不含任何平台专有命令或私有 API 依赖（已全量扫描确认）
 - **v1.7.0（2026-10-30）**：**选型决策层重构** —— 从"按组件类别罗列"改为"站点类型 → 视觉约束 → 组件"的决策结构，让 217 个组件真正进入候选池（v1.6 默认层仅覆盖 54/217 = 25%）。四项改动：① 数据层：catalog「依赖」列改为官方 registry 权威同步（217/217 非空，无依赖写 `-`），⚡WebGL 判定改为「依赖含 ogl/three ∪ 描述含 webgl/shader」，「适用」列改受控 region 枚举；② 词表统一：新增 taxonomy.json（25 site_type / 10 region / constraint 枚举），scene-guide / theme-backgrounds / interactions 三处旧行业名 100% 映射进统一词表，杜绝各表自造名词；③ 统一属性表 + 选型脚本：新增 components.yaml（217 行 × 9 字段，含 avoid_when 反例 100% 填充）与 scripts/select.mjs（三段式选型，全 site_type × 约束矩阵可复现 top3，候选去重 ≥ 60%）；④ 交付缺口：新增 component-usage.md（高频 31 组件 import/props/依赖/踩坑）、layout-guide 骨架改为"区间 + 触发条件"（作品集头部 40~70vh，内容 ≥2 行摘要触发 ≥56vh）、theme-backgrounds/pitfalls 补 46 个 cursor 驱动背景触屏降级清单；新增 scripts/verify.mjs 一条命令跑全部 7 项一致性校验。已知事实修正：官方已将多数背景重写为零 npm 依赖的内联 WebGL，Aurora/Silk 依赖列随之修正为 `-`（不再是过时的 ogl 手记）。工程修正：verify 的章节定位改为「按标题匹配 + 最大覆盖率兜底」（旧实现会误命中正文里的交叉引用句，导致清单漏检）；select.mjs 的 site_type 支持 id / 中文 label / 前缀模糊匹配，约束参数支持英文别名（dark/light/any、high/low）

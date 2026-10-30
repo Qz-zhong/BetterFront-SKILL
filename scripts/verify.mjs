@@ -11,6 +11,8 @@
  *      候选合集去重 ≥ 130/217（60%），五大类各自 ≥ 50%
  *   5. layout-guide 作品集/Landing/资讯三行均为区间 + 触发条件
  *   6. 触屏降级清单覆盖全部 cursor 驱动背景（≥46 个），theme-backgrounds 与 pitfalls 双落点
+ *   7.（工程契约）执行顺序：四项加速能力均为「优先路径 → 失败信号 → 兜底路径」三段式，
+ *      禁止预探测环境（EAFP），Step 2/4/5 各自内联兜底锚点
  *
  * 用法：node scripts/verify.mjs [--quiet]
  */
@@ -274,6 +276,26 @@ if (pitfallDegradSection) {
   check(`pitfalls 清单覆盖全部 ${cursorBgs.length} 个 cursor 背景`, miss.length === 0, `缺: ${miss.slice(0, 8).join(", ")}`);
 }
 
+// ============ 8. 执行顺序契约（优先路径 → 失败兜底，禁止先探测环境）============
+const skillText = readFileSync(path.join(ROOT, "SKILL.md"), "utf8");
+const sec7 = skillText.split(/^##\s+/m).find((s) => s.startsWith("7. 执行顺序"));
+check("SKILL.md 存在第 7 节「执行顺序：优先路径 → 失败兜底」", !!sec7);
+if (sec7) {
+  check("第 7 节表格为三段式（优先执行 / 失败信号 / 兜底路径）",
+    ["优先执行", "失败信号", "兜底路径"].every((h) => sec7.includes(h)));
+  check("第 7 节覆盖全部四项加速能力（选型/安装/验证/同步）",
+    ["选型", "安装", "验证", "同步"].every((k) => sec7.includes(k)));
+  check("第 7 节含「先试后退」铁律（不要预先探测环境）",
+    /先试后退|不要预先探测环境|不要先探测/.test(sec7));
+}
+const stepSections = skillText.split(/^###\s+/m);
+const stepOf = (name) => stepSections.find((s) => s.startsWith(name)) || "";
+check("Step 2 内联兜底锚点（脚本失败 → 第 7 节）", /第 7 节|兜底/.test(stepOf("Step 2")));
+check("Step 4 为优先级尝试链（A → B → C，不预探测）", /按优先级依次尝试/.test(stepOf("Step 4")));
+check("Step 5 验证为「先试后退」而非预探测",
+  /先试后退|直接尝试/.test(stepOf("Step 5")) &&
+  !/当前环境具备|不具备：|若具备/.test(stepOf("Step 5")));
+
 // ============ 汇总 ============
 console.log(`\n${"=".repeat(56)}`);
 console.log(`verify 结果：${pass} 通过 / ${fail} 失败`);
@@ -282,7 +304,7 @@ if (fail > 0) {
   for (const f of failures) console.log(`  - ${f}`);
   process.exit(1);
 } else {
-  console.log("✅ 全部 7 项验收通过 (exit 0)");
+  console.log("✅ 全部 7 项验收 + 执行顺序契约通过 (exit 0)");
   console.log(`   select 覆盖统计：${unionIds.size}/217 去重候选；` +
     CATS.map((c) => `${c} ${catCount[c].size}`).join(" / "));
 }
