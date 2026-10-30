@@ -90,12 +90,25 @@ git clone https://github.com/Qz-zhong/BetterFront-SKILL .trae/skills/betterfront
 
 **跨 Agent 通用性**（不绑定任何一家工具链）：
 
-| 能力 | 缺失时 | 表现 |
+**零依赖内核**：本 skill 的全部决策知识都是静态文件 —— `catalog.md`（217 组件目录）、`taxonomy.json`（统一词表）、`components.yaml`（217×9 属性池）、排版规范、反模板黑名单。
+任何能读文件的 Agent 都能跑完五步工作流，**不需要 Node、不需要 MCP、不需要联网、不调用任何 Agent 的私有 API**。这是它能跨 Agent 通用的原因。
+
+下面四项是**加速层**（把分钟级手工活变成秒级命令），缺失时走备选路径。
+**候选池完全一致** —— 同一份 taxonomy、同一份 components.yaml，脚本与手工筛出的是同一个集合
+（实测：太空/航天主题下两者都得到 11 个候选，第一顺位同为 `WarpText`）。
+top3 排序脚本用多维加权（视觉强度 + 主题特化 ×1.6 + 区域优先级 + 约束加减分），
+手工按 `visual_intensity` 降序 + `avoid_when` 排除，方向同向、**位次可能有个别差异**，但都落在同一候选池内：
+
+| 加速能力 | 缺失时的环境 | 备选路径（结论一致） |
 |---|---|---|
-| Node.js（≥18） | 脚本跑不了 | 降级为直接读 `components.yaml` + `taxonomy.json` 手工筛选，选型结论一致 |
-| MCP / registry 通道 | 无 MCP 配置 | 降级为 `npx shadcn@latest add ...` CLI，再降级为手动复制源码 |
-| 浏览器自动化 | 截不了图 | 降级为给 `npm run dev` 指引 + 预期效果清单，请用户确认 |
-| 网络 | 离线 | 217 组件目录、依赖、属性池全部内置在本仓库，离线可用（仅"同步最新目录"需联网） |
+| Node.js（≥18）跑 `scripts/select.mjs` | 环境无 Node | 手工读 `taxonomy.json` 定 site_type → 在 `components.yaml` 筛命中行 → 按 `visual_intensity` / `avoid_when` 排 top3 |
+| MCP / registry 通道 | 无 MCP 配置 | 通道 B：`npx shadcn@latest add ...` CLI；npx 也不可用 → 通道 C 手动复制源码 |
+| 浏览器自动化 | 截不了图 | 给 `npm run dev` 指引 + 预期效果清单，请用户肉眼确认 |
+| 网络 | 离线 | 217 组件目录 / 依赖 / 属性池全部内置，离线可完成选型与编码（仅 `sync-catalog.mjs` 拉最新目录需联网） |
+
+⚠️ 这张表描述的是**宿主运行时环境**（装没装 Node、有没有 MCP、能不能截图、联不联网），
+与"用哪款 Agent"是两个**正交**维度 —— 表里没有任何一项是"只有某某 Agent 才有"的能力，
+所以"走备选路径"不等于"功能被砍掉"，更不等于"不能跨 Agent 通用"。
 
 ## 兼容性
 

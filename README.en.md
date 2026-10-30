@@ -90,12 +90,25 @@ Then just tell your agent: *"build me a landing page for X"* — the skill steps
 
 **Agent-agnostic by design** (no dependency on any single toolchain):
 
-| Capability | If missing | Behaviour |
+**Zero-dependency core**: all decision knowledge is plain static files — `catalog.md` (217 components), `taxonomy.json` (shared vocabulary), `components.yaml` (217×9 attribute pool), the layout rules and the anti-template blacklist.
+Any agent that can read a file can run the full 5-step workflow — **no Node, no MCP, no network, no vendor-specific API**. That is exactly why it works across agents.
+
+The four items below are **accelerators** (they turn minutes of manual work into one command). If one is unavailable you take the alternate path.
+**The candidate pool is identical** — same taxonomy, same `components.yaml`, so script and hand-filtering yield the same set
+(measured: for the space/aerospace theme both produce 11 candidates, with `WarpText` ranked first in both).
+Ranking differs slightly: the script scores on multiple axes (visual intensity + theme specificity ×1.6 + region priority + constraint penalties),
+while the manual path sorts by `visual_intensity` desc and drops anything flagged in `avoid_when` — same direction, **possibly a different order**, but always inside the same pool:
+
+| Accelerator | Missing when | Alternate path (same outcome) |
 |---|---|---|
-| Node.js (≥18) | scripts can't run | Fall back to reading `components.yaml` + `taxonomy.json` by hand — same selection outcome |
-| MCP / registry channel | no MCP configured | Fall back to `npx shadcn@latest add ...`, then to copying source manually |
-| Browser automation | no screenshots | Fall back to `npm run dev` instructions + an expected-effects checklist for the user |
-| Network | offline | The 217-component catalog, deps and attribute pool are all vendored in this repo (only "sync latest catalog" needs network) |
+| Node.js (≥18) to run `scripts/select.mjs` | no Node in the environment | Read `taxonomy.json` to fix site_type → filter matching rows in `components.yaml` → rank top 3 by `visual_intensity` / `avoid_when` |
+| MCP / registry channel | no MCP configured | Channel B: `npx shadcn@latest add ...` CLI; if npx is unavailable too → channel C, copy source manually |
+| Browser automation | no screenshots | Give `npm run dev` instructions + an expected-effects checklist and ask the user to eyeball it |
+| Network | offline | The 217-component catalog, deps and attribute pool are all vendored here (only `sync-catalog.mjs` needs network) |
+
+⚠️ This table describes the **host runtime environment** (is Node installed, is MCP configured, can it screenshot, is there network) —
+a dimension that is **orthogonal** to "which agent you use". Nothing here is a capability only one particular agent has,
+so taking an alternate path is not a lost feature and does not weaken cross-agent portability.
 
 ## Compatibility
 

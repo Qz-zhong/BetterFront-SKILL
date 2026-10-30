@@ -1,12 +1,12 @@
 ---
 name: betterfront
-version: 1.7.1
+version: 1.7.2
 description: BetterFront — 让 AI 写出更有"人味"的动效前端。当用户在 React 项目中要求动画组件、炫酷背景、文本动效、微交互、创意画廊/导航/卡片或 landing page，或提到 React Bits / reactbits.dev / BetterFront 时使用。Use when the user wants animated React UI, creative backgrounds, text animations, micro-interactions, or mentions React Bits or BetterFront. 不适用于 Vue / 小程序 / 非 React 框架。
 ---
 
 # BetterFront · AI 动效前端开发
 
-> 版本：v1.7.1（变更记录见文末）
+> 版本：v1.7.2（变更记录见文末）
 > 组件能力基于开源库 [React Bits](https://www.reactbits.dev)（217 组件快照，致敬见开源 README Credits）
 
 BetterFront 让 AI 编程助手像资深工程师一样使用 React Bits 动效组件库（文本动画 / 动画 / 组件 / 微交互 / 背景五大类，每个组件有 JS|TS × CSS|Tailwind 四种变体）：内置全量组件目录快照 + 统一属性池 + 三段式选型脚本，按「站点类型 → 视觉约束 → 组件」决策，并强制"AI 给候选、用户拍板"的选型停点。
@@ -170,13 +170,18 @@ node scripts/verify.mjs         # 一条命令跑完全部一致性校验，exit
 
 MIT + Commons Clause：组件可自由用于个人与商业项目，但**不得将组件本身单独出售或再分发**。免费库与 React Bits Pro 是两个独立 registry，Pro 安装命令需要 license key，禁止混用。
 
-## 7. 环境降级（保证任何 Agent 都能跑完流程）
+## 7. 环境降级（加速层缺失时的备选路径）
 
-本 skill 不依赖任何 Agent 的私有能力。四类环境缺失时按下表降级，**不要因为环境不全就跳过工作流**：
+**先分清两个维度**：本 skill 的决策知识全是静态文件（`catalog.md` / `taxonomy.json` / `components.yaml` / 排版规范 / 反模板黑名单），
+这是**零依赖内核** —— 不需要 Node、不需要 MCP、不需要联网、不调用任何 Agent 的私有 API，任何能读文件的 Agent 都能跑完工作流。
+下面四项只是**加速层**（把手工活变成一条命令），缺失时换一条路走，**选型结论完全一致**。
+「降级」在这里指的是**换路径**，不是**砍功能**；且它描述的是宿主运行时环境，与用哪款 Agent 正交 —— 不要把它理解成"只能在某类环境用"。
+
+四类环境缺失时按下表走备选路径，**不要因为环境不全就跳过工作流**：
 
 | 缺失 | 降级做法 |
 |---|---|
-| **Node.js**（跑不了 `scripts/select.mjs`） | 直接读 `references/taxonomy.json` 定 site_type 与约束 → 在 `references/components.yaml` 里筛 `site_type` 命中的行 → 按 `visual_intensity` 与 `avoid_when` 排 top3。结论与脚本一致，只是慢一点 |
+| **Node.js**（跑不了 `scripts/select.mjs`） | 直接读 `references/taxonomy.json` 定 site_type 与约束 → 在 `references/components.yaml` 里筛 `site_type` 命中的行（例：`grep -w space` 得 11 个，与脚本候选池 11 完全一致）→ 按 `visual_intensity` 降序排、用 `avoid_when` 排除不合约束的 → top3。脚本用多维加权打分，**手工只能逼近、位次可能有个别差异**，但候选池相同、结论方向一致，只是慢一点 |
 | **MCP / registry 通道** | 用通道 B（CLI）`npx shadcn@latest add https://reactbits.dev/r/<CliId>-<VARIANT>`；npx 也不可用则通道 C 手动复制源码 |
 | **浏览器自动化**（截不了图） | 给用户 `npm run dev` 指引 + 预期效果清单（哪个区域该有什么动效、叠字是否可读、1366 宽是否溢出），请用户肉眼确认 |
 | **网络** | 217 组件目录 / 依赖 / 属性池全部内置在本目录，离线可完成选型与编码；只有 `sync-catalog.mjs` 拉最新目录需要联网 |
@@ -185,6 +190,7 @@ MIT + Commons Clause：组件可自由用于个人与商业项目，但**不得�
 
 ## 变更记录
 
+- **v1.7.2（2026-10-30）**：**澄清「降级」语义** —— 第 7 节与中英 README 明确区分两个正交维度：决策知识是**零依赖内核**（静态文件，任何能读文件的 Agent 都能跑完五步，无需 Node/MCP/网络/私有 API），Node 脚本 / MCP 通道 / 浏览器自动化 / 网络四项只是**加速层**，缺失时换备选路径且**选型结论一致**；补充「降级 = 换路径，不是砍功能；宿主运行时环境与 Agent 品牌正交」的说明，消除「无法跨 Agent 通用」的误读
 - **v1.7.1（2026-10-30）**：**跨 Agent 通用性** —— 新增第 7 节「环境降级」：明确 Node 缺失（手工查 components.yaml）/ MCP 缺失（CLI 兜底）/ 浏览器自动化缺失（指引 + 预期效果清单）/ 离线（217 组件快照内置）四种情况下的降级路径，并要求在回复中显式说明降级原因；README 安装地址占位符 `github.com/<you>/...` 修正为真实仓库 `github.com/Qz-zhong/BetterFront-SKILL`，中英双语新增「跨 Agent 通用性」对照表。技能不含任何平台专有命令或私有 API 依赖（已全量扫描确认）
 - **v1.7.0（2026-10-30）**：**选型决策层重构** —— 从"按组件类别罗列"改为"站点类型 → 视觉约束 → 组件"的决策结构，让 217 个组件真正进入候选池（v1.6 默认层仅覆盖 54/217 = 25%）。四项改动：① 数据层：catalog「依赖」列改为官方 registry 权威同步（217/217 非空，无依赖写 `-`），⚡WebGL 判定改为「依赖含 ogl/three ∪ 描述含 webgl/shader」，「适用」列改受控 region 枚举；② 词表统一：新增 taxonomy.json（25 site_type / 10 region / constraint 枚举），scene-guide / theme-backgrounds / interactions 三处旧行业名 100% 映射进统一词表，杜绝各表自造名词；③ 统一属性表 + 选型脚本：新增 components.yaml（217 行 × 9 字段，含 avoid_when 反例 100% 填充）与 scripts/select.mjs（三段式选型，全 site_type × 约束矩阵可复现 top3，候选去重 ≥ 60%）；④ 交付缺口：新增 component-usage.md（高频 31 组件 import/props/依赖/踩坑）、layout-guide 骨架改为"区间 + 触发条件"（作品集头部 40~70vh，内容 ≥2 行摘要触发 ≥56vh）、theme-backgrounds/pitfalls 补 46 个 cursor 驱动背景触屏降级清单；新增 scripts/verify.mjs 一条命令跑全部 7 项一致性校验。已知事实修正：官方已将多数背景重写为零 npm 依赖的内联 WebGL，Aurora/Silk 依赖列随之修正为 `-`（不再是过时的 ogl 手记）。工程修正：verify 的章节定位改为「按标题匹配 + 最大覆盖率兜底」（旧实现会误命中正文里的交叉引用句，导致清单漏检）；select.mjs 的 site_type 支持 id / 中文 label / 前缀模糊匹配，约束参数支持英文别名（dark/light/any、high/low）
 - **v1.6.0（2026-10-29）**：品牌更名 **BetterFront**（原 react-bits skill），定位解耦组件库——README 以 Credits 致谢来源仓库；React Bits 保留为触发关键词与能力来源
