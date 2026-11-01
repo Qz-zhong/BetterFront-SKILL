@@ -13,7 +13,7 @@
 > **v1.7.0 — rebuilt decision layer.** Selection moved from "list components by category" to a three-stage **site type → visual constraint → component** pipeline. All 217 components now enter the candidate pool (in v1.6 only 54/217 = 25% had any recommendation path). One command runs all consistency checks:
 > ```bash
 > node scripts/select.mjs --site-type saas --background-mode dark --mobile-ratio high
-> node scripts/verify.mjs   # 39 checks, exit 0
+> node scripts/verify.mjs   # 46 checks, exit 0
 > ```
 
 **中文文档**：[README.md](README.md)
@@ -71,7 +71,7 @@ Open [demo/comparison/before.html](demo/comparison/before.html) and [demo/compar
 | 📖 Component usage notes | Import paths, required props, deps and tested gotchas for the 31 most-used components |
 | ✅ Dual-resolution verification | 1920×1080 + 1366×768 screenshot self-check for both motion and layout |
 | 🔄 Auto-syncing catalog | One command refreshes the component catalog and deps, and flags any stale component references |
-| 🔍 One-command consistency check | `node scripts/verify.mjs` runs all 39 checks across 7 groups (data layer / vocabulary / attribute pool / selector / skeletons / touch list) — green means shippable |
+| 🔍 One-command consistency check | `node scripts/verify.mjs` runs all 46 checks across 7 groups (data layer / vocabulary / attribute pool / selector / skeletons / touch list) — green means shippable |
 
 ## Install
 
