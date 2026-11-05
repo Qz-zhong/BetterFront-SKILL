@@ -16,7 +16,7 @@
  *   node scripts/select.mjs --list-types
  */
 
-import { readFileSync } from "node:fs";
+import { readFileSync, realpathSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseComponentsYaml } from "./yaml-lite.mjs";
@@ -248,7 +248,12 @@ function main() {
 
 const isMain = (() => {
   try {
-    return process.argv[1] && path.resolve(process.argv[1]) === path.resolve(fileURLToPath(import.meta.url));
+    if (!process.argv[1]) return false;
+    // Windows 下 skill 常经 Junction/软链加载：Node 会把模块路径解析为真实路径，
+    // argv[1] 仍是链接路径 —— 两边都做 realpath 归一后再比较，否则会静默跳过 CLI。
+    const self = realpathSync(path.resolve(fileURLToPath(import.meta.url)));
+    const invoked = realpathSync(path.resolve(process.argv[1]));
+    return self === invoked;
   } catch { return false; }
 })();
 if (isMain) {
