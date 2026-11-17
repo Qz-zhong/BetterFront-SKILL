@@ -64,3 +64,20 @@
 **清单（46 个）**：Antigravity, Aurora, Balatro, Ballpit, Beams, DarkVeil, Dither, DotField, DotGrid, FaultyTerminal, Ferrofluid, FloatingLines, FluxLines, Galaxy, GradientASCII, GradientBlinds, GradientWaves, Grainient, GridDistortion, Iridescence, LetterGlitch, Lightfall, Lightning, LightPillar, LightRays, LightTunnel, LiquidChrome, LiquidEther, MagicRings, MagnetLines, MoltenMetal, Orb, Particles, PixelBlast, PixelSnow, Plasma, PrismaticBurst, Scanner, ShapeGrid, SideRays, Silk, SlicedWaves, Threads, Topography, Waves, WebThreads
 
 > 逐组件的输入模式以 components.yaml 的 `input` 字段为准（`静态` / `需鼠标` / `触屏可降级`），select 脚本在 `--mobile-ratio 高` 时自动降权前两类。
+
+## 9. 遗留模式黑名单（v1.8.0，参考 Modern Web Guidance）
+
+现代 Web 平台已有原生解法的场景，**默认不写遗留实现**；交付前跑 `node scripts/legacy-scan.mjs <项目>/src` 产出候选，逐条按 keepWhen/dropWhen 核验。写法与回退见 [modern-platform.md](modern-platform.md)：
+
+| # | 遗留模式 | 原生替代 |
+|---|---|---|
+| 1 | `addEventListener('scroll')` + transform 手写滚动动效 | scroll-driven animations（`@supports` 回退） |
+| 2 | IntersectionObserver 仅做视觉 reveal | scroll-driven animations |
+| 3 | 手写 fixed 覆盖层模态（state 开关 + 遮罩） | `<dialog>` + `::backdrop` + `@starting-style` |
+| 4 | mousemove 手写定位 tooltip/浮层 | Popover API + anchor positioning |
+| 5 | `setInterval` 驱动装饰性匀速轮播 | CSS keyframes 无限循环 + `prefers-reduced-motion` 关停 |
+| 6 | dataset/classList 手写深浅色双份样式 | `light-dark()` + oklch 变量 |
+| 7 | 引入 polyfill.io / core-js 等垫片（默认现代目标） | 移除；确需回退用 `@supports` ≤20 行 |
+| 8 | requestAnimationFrame 逐帧补间 DOM opacity/transform | CSS transition + `linear()`（canvas/WebGL 循环除外） |
+
+> 铁律：新特性裸用必须带回退且回退态内容完整；单条回退 ≤20 行、零依赖；超预算改用 React Bits 组件方案。核验惯例：**第三方组件内部实现（如 `src/components` 下安装的组件源码）视为 vendor code，默认 drop** —— 只对 Agent 自写的业务代码做核验与修复（与 MWG 的 false-positive 分类一致）。

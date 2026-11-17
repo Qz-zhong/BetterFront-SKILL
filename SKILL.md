@@ -1,15 +1,15 @@
 ---
 name: betterfront
-version: 1.7.3
+version: 1.8.0
 description: BetterFront — 让 AI 写出更有"人味"的动效前端。当用户在 React 项目中要求动画组件、炫酷背景、文本动效、微交互、创意画廊/导航/卡片或 landing page，或提到 React Bits / reactbits.dev / BetterFront 时使用。Use when the user wants animated React UI, creative backgrounds, text animations, micro-interactions, or mentions React Bits or BetterFront. 不适用于 Vue / 小程序 / 非 React 框架。
 ---
 
 # BetterFront · AI 动效前端开发
 
-> 版本：v1.7.3（变更记录见文末）
+> 版本：v1.8.0（变更记录见文末）
 > 组件能力基于开源库 [React Bits](https://www.reactbits.dev)（217 组件快照，致敬见开源 README Credits）
 
-BetterFront 让 AI 编程助手像资深工程师一样使用 React Bits 动效组件库（文本动画 / 动画 / 组件 / 微交互 / 背景五大类，每个组件有 JS|TS × CSS|Tailwind 四种变体）：内置全量组件目录快照 + 统一属性池 + 三段式选型脚本，按「站点类型 → 视觉约束 → 组件」决策，并强制"AI 给候选、用户拍板"的选型停点。
+BetterFront 让 AI 编程助手像资深工程师一样使用 React Bits 动效组件库（文本动画 / 动画 / 组件 / 微交互 / 背景五大类，每个组件有 JS|TS × CSS|Tailwind 四种变体）：内置全量组件目录快照 + 统一属性池 + 三段式选型脚本 + **原生平台优先分流**（参考 Modern Web Guidance），按「意图 → 原生可达性 → 站点类型 → 视觉约束 → 组件」决策，并强制"AI 给候选、用户拍板"的选型停点。
 
 ## 0. 快速判断
 
@@ -24,6 +24,7 @@ BetterFront 让 AI 编程助手像资深工程师一样使用 React Bits 动效�
 
 | 文件 | 内容 | 何时读 |
 |---|---|---|
+| `references/modern-platform.md` | **原生平台优先指引**：12 个现代特性（scroll-driven animations / dialog / Popover / oklch…）+ React Bits→原生替代映射表 | **Step 1.5 分流必读**；交付自查时回查 |
 | `references/taxonomy.json` | **统一词表**：site_type(25) / region(10) / constraint 枚举 + 旧主题映射 | 选型前确定 site_type 与约束词，**词表唯一来源** |
 | `references/components.yaml` | 217 组件统一属性池（区域/站点类型/强度/叠字/性能/输入/反例） | select 脚本的数据源；查组件属性时读 |
 | `references/scene-guide.md` | 页面区域 → 开放示例集（人工示例，非唯一决策源） | 区域性选型的组合参考 |
@@ -36,6 +37,7 @@ BetterFront 让 AI 编程助手像资深工程师一样使用 React Bits 动效�
 | `references/pitfalls.md` | 性能 / 可访问性 / 兼容 / 触屏降级 / 组合红线 | **写代码前必读** |
 | `references/deps.json` | 官方 registry 依赖缓存（sync 脚本产出） | 离线兜底，无需人工读 |
 | `scripts/select.mjs` | **三段式选型脚本**（站点类型 → 约束 → 强度排序） | Step 2 组件匹配**第一步执行** |
+| `scripts/legacy-scan.mjs` | 遗留模式扫描器（8 条确定性规则，候选输出需人工核验） | Step 5 交付前执行 |
 
 五大类组件数量以 `catalog.md` 头部统计为准。
 
@@ -55,6 +57,15 @@ BetterFront 让 AI 编程助手像资深工程师一样使用 React Bits 动效�
 | 鼠标跟随 / 点击反馈 / 光标特效 | 光标交互 | catalog: animations 中 cursor 类 |
 | 图片墙 / 作品展示 / 画廊 | 画廊 | catalog: components 画廊组 |
 | 整页 / landing page / 作品集 | 整页模式 | 跳到第 3 节 + recipes.md |
+
+### Step 1.5 原生优先分流（v1.8.0，参考 Modern Web Guidance）
+
+选型前先问一句：**这个意图现代 Web 平台能否原生达成？**
+
+1. 查 [modern-platform.md](references/modern-platform.md) 第 2 节「原生替代映射表」：意图（简单滚动进场 / 匀速跑马灯 / 模态 / 定位浮层 / 深浅色板…）命中**全部替换判据** → 用原生方案 + 按该指引带回退，跳过组件安装
+2. 未命中（高级视觉：WebGL 背景 / 物理动效 / 逐字编排 / 变速交互…）→ 走 Step 2 React Bits 选型
+3. 分流原则：**平台能原生达成的简单动效不引库；替换判据不满足时一律回到 React Bits**——原生方案是分流出口，不是第二组件库
+4. 分流结论写入推荐说明（一句话即可），让用户知道"为什么这里不用组件 / 为什么这里用了组件"
 
 ### Step 2 组件匹配（三段式选型）
 
@@ -132,6 +143,7 @@ npx jsrepo@latest add https://reactbits.dev/r/<CliId>-<VARIANT>
 3. **验证（先试后退）**：**直接尝试**起 dev server（或 `build && preview`，更稳）→ **1920×1080 与 1366×768 双档截图** → 确认动画真实生效 + 排版自查通过。
    不要预先判断"能不能截图"；仅在真的失败（无浏览器工具 / 报缺 chromium / server 起不来）时才切兜底：给用户 `npm run dev` 指引与预期效果清单，请用户确认（见第 7 节）
 4. **不生效排查顺序**：import 路径 → 必需 props → 依赖版本 → 对照官方源码逐行核对
+5. **遗留模式自查（v1.8.0，交付前）**：`node scripts/legacy-scan.mjs <项目>/src` —— 检出的**候选**逐条按 keepWhen/dropWhen 核验后修复（原生替代写法见 modern-platform.md）；仅静态确定性规则，不替代人工审查
 
 ## 3. 整页构建模式
 
@@ -151,6 +163,7 @@ npx jsrepo@latest add https://reactbits.dev/r/<CliId>-<VARIANT>
 - 文本动画不用于长段落正文，只用于标题/短语
 - 光标跟随类组件在触屏设备上无效果，需设计降级
 - 动效为内容服务：如果删掉动效页面更好，就删掉
+- **新平台特性（v1.8.0）**：Baseline Newly Available 特性（scroll-driven animations / anchor positioning 等）裸用必须带 `@supports` 回退（≤20 行、零依赖）；模态优先 `<dialog>`，非模态浮层优先 Popover API——手写 fixed 覆盖层属遗留模式（见 pitfalls 第 9 节）
 
 ## 5. 知识库维护
 
@@ -188,6 +201,7 @@ MIT + Commons Clause：组件可自由用于个人与商业项目，但**不得�
 | **安装**（Step 4） | 通道 A：MCP 直接装 `<CliId>-<VARIANT>` | MCP 工具不存在 / 报 registry 未配置 | 通道 B：`npx shadcn@latest add https://reactbits.dev/r/<CliId>-<VARIANT>` → 若 npx 也不可用或网络失败 → 通道 C 手动复制源码 |
 | **验证**（Step 5） | 起 dev server（或 `build && preview`）→ **1920×1080 与 1366×768 双档截图** | 无浏览器工具 / 截图报缺 chromium / dev server 起不来 | 给用户 `npm run dev` 指引 + 预期效果清单（哪个区域该有什么动效、叠字是否可读、1366 宽是否溢出），请用户肉眼确认 |
 | **同步目录**（第 5 节） | `node scripts/sync-catalog.mjs` | fetch 失败 / 超时 / DNS 报错 | 直接用内置的 217 组件目录 + `deps.json` 继续（只是非最新），**工作流不中断** |
+| **原生指引**（Step 1.5 / 遗留自查） | `npx -y modern-web-guidance@latest search "<2~5词动宾查询>"` / `retrieve "<id>"`（官方 262 指引，四浏览器厂商联合维护） | 离线 / npx 失败 / 查询超时 | 用内置 `references/modern-platform.md`（12 指引 + 替代映射表）兜底；遗留自查用内置 `scripts/legacy-scan.mjs`（零依赖） |
 
 两条铁律：
 
@@ -198,6 +212,7 @@ MIT + Commons Clause：组件可自由用于个人与商业项目，但**不得�
 
 ## 变更记录
 
+- **v1.8.0（2026-11-17）**：**原生平台优先分流（参考 [Modern Web Guidance](https://github.com/GoogleChrome/modern-web-guidance)）** —— 借鉴 Chrome/Edge/Firefox/MDN 联合维护的 MWG 技能体系「Agent 默认生成遗留模式，应优先使用现代平台能力」的核心论点，为选型决策链增加前置分流层：① 新增 `references/modern-platform.md`（12 个高价值现代特性精简指引：scroll-driven animations / View Transitions / `<dialog>`+`@starting-style` / Popover API / anchor positioning / `light-dark()`+oklch / `text-box` / container queries / 滚动质感套件 / `content-visibility` / 交互媒体查询 / Baseline 回退策略，含 React 框架适配注意）+ React Bits→原生替代映射表（命中全部替换判据才替换，不满足一律回组件）；② 新增 `scripts/legacy-scan.mjs`（8 条确定性遗留模式规则，每条带 keepWhen/dropWhen，输出仅候选需人工核验），并入 Step 5 交付前自查；③ SKILL.md 新增 Step 1.5「原生优先分流」与红线追加（`@supports` 回退强制、模态/浮层原生优先），第 7 节加速层表新增 MWG 官方 CLI 行（离线时内置指引兜底）；④ pitfalls.md 新增第 8 节遗留模式黑名单，layout-guide 色板句补 oklch/light-dark()；⑤ verify.mjs 新增第 9 组断言（含 legacy-scan fixture 自测），46 → 52 项。React Bits 仍是高级动效主力——原生层只承接平台已内置的简单场景，定位是分流器而非第二组件库
 - **v1.7.3（2026-10-30）**：**执行顺序改为「先试最优 → 撞墙再退」** —— 原第 7 节是「缺失 → 降级做法」静态对照表，Step 5 用的是「先判断能不能截图、再决定怎么验证」的预探测（LBYL）句式，会导致 Agent 因猜错环境而白白放弃更优路径。改为：① 第 7 节表格扩为三段式「优先执行 / 失败信号 / 兜底路径」，每项给出真实失败信号（`node: not found`、缺 chromium、fetch 超时等），不再依赖猜测；② 明确 EAFP 铁律——不要预先探测运行时环境（`node` 在但 <18、npx 在但离线、浏览器工具在但没装 chromium，预探测都会误判），例外是项目配置类（package.json / components.json / tsconfig.json）必须主动读，那是获取信息不是探测；③ Step 2 / Step 5 就地内联兜底锚点，兜底指引不再只存在于第 7 节；Step 4 本就是 A→B→C 优先级链，保持不变；④ verify.mjs 新增第 8 组「执行顺序契约」7 项断言（三段式表头 / 四项能力齐全 / 先试后退铁律 / 三步各含兜底锚点 / Step 5 不再出现预探测句式），46 项全绿
 - **v1.7.2（2026-10-30）**：**澄清「降级」语义** —— 第 7 节与中英 README 明确区分两个正交维度：决策知识是**零依赖内核**（静态文件，任何能读文件的 Agent 都能跑完五步，无需 Node/MCP/网络/私有 API），Node 脚本 / MCP 通道 / 浏览器自动化 / 网络四项只是**加速层**，缺失时换备选路径且**选型结论一致**；补充「降级 = 换路径，不是砍功能；宿主运行时环境与 Agent 品牌正交」的说明，消除「无法跨 Agent 通用」的误读
 - **v1.7.1（2026-10-30）**：**跨 Agent 通用性** —— 新增第 7 节「环境降级」：明确 Node 缺失（手工查 components.yaml）/ MCP 缺失（CLI 兜底）/ 浏览器自动化缺失（指引 + 预期效果清单）/ 离线（217 组件快照内置）四种情况下的降级路径，并要求在回复中显式说明降级原因；README 安装地址占位符 `github.com/<you>/...` 修正为真实仓库 `github.com/Qz-zhong/BetterFront-SKILL`，中英双语新增「跨 Agent 通用性」对照表。技能不含任何平台专有命令或私有 API 依赖（已全量扫描确认）

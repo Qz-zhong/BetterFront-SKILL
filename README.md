@@ -12,10 +12,12 @@
 
 **Unofficial community skill** —— 一个遵循开放 [Agent Skills](https://agentskills.io) 规范的编程助手技能（Skill），让 AI 在 React 项目中表现如熟悉动效组件库全量 API 的资深工程师。
 
-> **v1.7.3 选型决策层重构**：选型从"按组件类别罗列"改为 **站点类型 → 视觉约束 → 组件** 的三段式决策。217 个组件全部进入候选池（v1.6 时代只有 54/217 = 25% 有推荐路径），一条命令跑完 7 项一致性校验：
+> **v1.8.0 原生平台优先分流（参考 [Modern Web Guidance](https://github.com/GoogleChrome/modern-web-guidance)）**：选型决策链新增前置分流——简单滚动进场 / 匀速跑马灯 / 模态 / 定位浮层 / 深浅色板等场景，现代 Web 平台（scroll-driven animations / `<dialog>` / Popover API / `light-dark()`）已可原生达成且带回退，不再引库；高级视觉动效仍走 React Bits。新增 12 条原生指引（modern-platform.md）+ 遗留模式扫描器 legacy-scan.mjs（交付前自查 8 条确定性遗留模式），verify 升至 52 项检查。
+>
+> **v1.7.3 选型决策层重构**：选型从"按组件类别罗列"改为 **站点类型 → 视觉约束 → 组件** 的三段式决策。217 个组件全部进入候选池（v1.6 时代只有 54/217 = 25% 有推荐路径），一条命令跑完全部一致性校验：
 > ```bash
 > node scripts/select.mjs --site-type saas --background-mode 深底 --mobile-ratio 高
-> node scripts/verify.mjs   # 46 项检查，exit 0
+> node scripts/verify.mjs   # 52 项检查，exit 0
 > ```
 
 ---
@@ -130,6 +132,7 @@ git clone https://github.com/Qz-zhong/BetterFront-SKILL .trae/skills/betterfront
 - [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) —— 间距档位与视觉层级规则借鉴
 - [impeccable-lite](https://github.com/ilindaniel/impeccable-lite) —— 排版细节与留白规则借鉴
 - [shadcn-ui](https://github.com/shadcn-ui/ui) —— 组件安装 CLI 通道
+- [GoogleChrome/modern-web-guidance](https://github.com/GoogleChrome/modern-web-guidance) —— v1.8.0「原生平台优先」决策层的理念与结构范式来源（Chrome/Edge/Firefox/MDN 联合维护）；本技能仅借鉴其理念与文档结构，指引内容为独立撰写，不复制其内容
 - [Trae](https://www.trae.ai) · [Claude Code](https://claude.com/claude-code) —— Agent Skills 生态
 
 > **声明**：BetterFront 为非官方社区项目，与 React Bits 及其商业版 Pro 无隶属关系。组件目录仅引用官方公开的组件名与描述，不包含、不转售任何组件源码。

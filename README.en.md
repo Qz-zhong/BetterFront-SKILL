@@ -10,10 +10,12 @@
 
 **Unofficial community skill** — built on the open [Agent Skills](https://agentskills.io) spec. Makes your AI coding agent work like a senior engineer who knows every one of the 217 animated components in React Bits.
 
+> **v1.8.0 — native-platform-first gate (inspired by [Modern Web Guidance](https://github.com/GoogleChrome/modern-web-guidance)).** The decision chain now asks first whether a modern web platform feature can achieve the intent natively — simple scroll reveals / uniform marquees / modals / anchored overlays / light-dark palettes (scroll-driven animations, `<dialog>`, Popover API, `light-dark()`) ship with `@supports` fallbacks instead of new libraries; high-end visual effects still route to React Bits. Ships with 12 native guides (`modern-platform.md`) and a legacy-pattern scanner `legacy-scan.mjs` (8 deterministic rules, human-verified before edits). verify now runs 52 checks.
+>
 > **v1.7.0 — rebuilt decision layer.** Selection moved from "list components by category" to a three-stage **site type → visual constraint → component** pipeline. All 217 components now enter the candidate pool (in v1.6 only 54/217 = 25% had any recommendation path). One command runs all consistency checks:
 > ```bash
 > node scripts/select.mjs --site-type saas --background-mode dark --mobile-ratio high
-> node scripts/verify.mjs   # 46 checks, exit 0
+> node scripts/verify.mjs   # 52 checks, exit 0
 > ```
 
 **中文文档**：[README.md](README.md)
@@ -71,7 +73,8 @@ Open [demo/comparison/before.html](demo/comparison/before.html) and [demo/compar
 | 📖 Component usage notes | Import paths, required props, deps and tested gotchas for the 31 most-used components |
 | ✅ Dual-resolution verification | 1920×1080 + 1366×768 screenshot self-check for both motion and layout |
 | 🔄 Auto-syncing catalog | One command refreshes the component catalog and deps, and flags any stale component references |
-| 🔍 One-command consistency check | `node scripts/verify.mjs` runs all 46 checks across 7 groups (data layer / vocabulary / attribute pool / selector / skeletons / touch list) — green means shippable |
+| 🔍 One-command consistency check | `node scripts/verify.mjs` runs all 52 checks across 9 groups (data layer / vocabulary / attribute pool / selector / skeletons / touch list / legacy scan / execution contract / native-first gate) — green means shippable |
+| 🌿 Native-platform-first gate | 12 modern-platform guides + a React Bits→native mapping table: simple reveals, modals, overlays and light-dark palettes ship as platform-native code with fallbacks; `legacy-scan.mjs` flags 8 deterministic legacy patterns before delivery |
 
 ## Install
 
@@ -131,6 +134,7 @@ Standing on the shoulders of these excellent open-source projects:
 - [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) — spacing-scale and visual-hierarchy rules
 - [impeccable-lite](https://github.com/ilindaniel/impeccable-lite) — layout details and whitespace rhythm
 - [shadcn-ui](https://github.com/shadcn-ui/ui) — the component install CLI channel
+- [GoogleChrome/modern-web-guidance](https://github.com/GoogleChrome/modern-web-guidance) — inspiration and structural model for the v1.8.0 native-platform-first gate (maintained by the Chrome/Edge/Firefox/MDN teams); this skill borrows the ideas and document structure only — all guide content here is written independently, none is copied
 - [Trae](https://www.trae.ai) · [Claude Code](https://claude.com/claude-code) — the Agent Skills ecosystem
 
 > **Disclaimer**: BetterFront is an unofficial community project, not affiliated with React Bits or its commercial Pro edition. The catalog only references publicly available component names and descriptions — no component source code is included or resold.

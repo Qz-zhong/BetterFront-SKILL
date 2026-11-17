@@ -17,7 +17,9 @@
  * 用法：node scripts/verify.mjs [--quiet]
  */
 
-import { readFileSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdtempSync, rmSync } from "node:fs";
+import os from "node:os";
+import { execFileSync } from "node:child_process";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseComponentsYaml } from "./yaml-lite.mjs";
@@ -296,6 +298,61 @@ check("Step 5 验证为「先试后退」而非预探测",
   /先试后退|直接尝试/.test(stepOf("Step 5")) &&
   !/当前环境具备|不具备：|若具备/.test(stepOf("Step 5")));
 
+// ============ 9. 原生平台优先（v1.8.0，参考 Modern Web Guidance）============
+section("9. 原生优先：modern-platform 指引 / SKILL 分流锚点 / legacy-scan 自测");
+let modernText = "";
+try { modernText = REF("modern-platform.md"); check("references/modern-platform.md 存在", true); }
+catch { check("references/modern-platform.md 存在", false); }
+if (modernText) {
+  const guides = (modernText.match(/^### 1\.\d+ /gm) || []).length;
+  check("modern-platform.md 含 12 个原生指引（### 1.1 ~ 1.12）", guides === 12, `实际 ${guides}`);
+  check("modern-platform.md 含原生替代映射表", modernText.includes("原生替代映射表"));
+  check("modern-platform.md 含 Baseline 回退策略与 @supports 原则",
+    modernText.includes("Baseline") && /@supports/.test(modernText));
+}
+check("SKILL.md 含 Step 1.5 原生优先分流锚点",
+  /Step 1\.5 原生优先分流/.test(skillText) && skillText.includes("modern-platform.md"));
+check("SKILL.md Step 5 含 legacy-scan 交付自查锚点",
+  /legacy-scan\.mjs <项目>\/src/.test(skillText));
+check("SKILL.md 红线含 @supports 回退与 dialog/Popover 原生优先",
+  /@supports`?\s*回退/.test(skillText) && /<dialog>/.test(skillText) && /Popover API/.test(skillText));
+check("pitfalls.md 含第 9 节遗留模式黑名单（8 条规则表）",
+  /^## 9\. 遗留模式黑名单/m.test(pitfallsText) &&
+  (pitfallsText.split(/^##\s+/m).find((s) => s.startsWith("9. 遗留模式黑名单")) || "").split("|").length >= 20);
+check("layout-guide.md 设计契约含 oklch / light-dark() 建议",
+  layoutText.includes("oklch") && layoutText.includes("light-dark()"));
+// legacy-scan fixture 自测：脏文件（4 类遗留模式）检出 ≥4，干净文件检出 0
+try {
+  const tmp = mkdtempSync(path.join(os.tmpdir(), "bf-legacy-fixture-"));
+  writeFileSync(path.join(tmp, "dirty.tsx"), `
+export function Dirty() {
+  useEffect(() => {
+    const onScroll = () => { el.style.transform = 'translateY(' + window.scrollY + 'px)'; };
+    window.addEventListener('scroll', onScroll);
+    const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) e.target.classList.add('reveal'); }));
+    setInterval(() => setSlide((s) => (s + 1) % 5), 3000);
+    document.documentElement.dataset.theme = 'dark';
+  }, []);
+  return open ? <div className="fixed inset-0 z-50"><div className="backdrop" /></div> : null;
+}`);
+  writeFileSync(path.join(tmp, "clean.tsx"), `export function Clean() { return <div>ok</div>; }`);
+  const out = JSON.parse(
+    execFileSync(process.execPath, [path.join(ROOT, "scripts", "legacy-scan.mjs"), tmp, "--json"], { encoding: "utf8" })
+  );
+  const dirty = out.results.find((r) => r.file.includes("dirty"));
+  const clean = out.results.find((r) => r.file.includes("clean"));
+  check("legacy-scan 自测：脏文件检出 ≥4 类遗留模式", !!dirty && dirty.findings.length >= 4,
+    dirty ? `实际 ${dirty.findings.length}` : "未检出");
+  check("legacy-scan 自测：干净文件检出 0", (!clean || clean.findings.length === 0));
+  rmSync(tmp, { recursive: true, force: true });
+} catch (e) {
+  check("legacy-scan 自测可执行", false, e.message);
+}
+check("SKILL.md 版本为 1.8.0 且知识库表含 modern-platform",
+  /^version: 1\.8\.0$/m.test(skillText) && skillText.includes("references/modern-platform.md"));
+const readmeZh = readFileSync(path.join(ROOT, "README.md"), "utf8");
+check("README.md 版本段含 v1.8.0（原生平台优先）", readmeZh.includes("1.8.0"));
+
 // ============ 汇总 ============
 console.log(`\n${"=".repeat(56)}`);
 console.log(`verify 结果：${pass} 通过 / ${fail} 失败`);
@@ -304,7 +361,7 @@ if (fail > 0) {
   for (const f of failures) console.log(`  - ${f}`);
   process.exit(1);
 } else {
-  console.log("✅ 全部 7 项验收 + 执行顺序契约通过 (exit 0)");
+  console.log("✅ 全部 7 项验收 + 执行顺序契约 + 原生优先契约通过 (exit 0)");
   console.log(`   select 覆盖统计：${unionIds.size}/217 去重候选；` +
     CATS.map((c) => `${c} ${catCount[c].size}`).join(" / "));
 }
