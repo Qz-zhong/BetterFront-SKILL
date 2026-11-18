@@ -12,12 +12,12 @@
 
 **Unofficial community skill** —— 一个遵循开放 [Agent Skills](https://agentskills.io) 规范的编程助手技能（Skill），让 AI 在 React 项目中表现如熟悉动效组件库全量 API 的资深工程师。
 
-> **v1.8.0 原生平台优先分流（参考 [Modern Web Guidance](https://github.com/GoogleChrome/modern-web-guidance)）**：选型决策链新增前置分流——简单滚动进场 / 匀速跑马灯 / 模态 / 定位浮层 / 深浅色板等场景，现代 Web 平台（scroll-driven animations / `<dialog>` / Popover API / `light-dark()`）已可原生达成且带回退，不再引库；高级视觉动效仍走 React Bits。新增 12 条原生指引（modern-platform.md）+ 遗留模式扫描器 legacy-scan.mjs（交付前自查 8 条确定性遗留模式），verify 升至 52 项检查。
+> **v1.8.0 原生平台优先分流（参考 [Modern Web Guidance](https://github.com/GoogleChrome/modern-web-guidance)）**：选型决策链新增前置分流——简单滚动进场 / 匀速跑马灯 / 模态 / 定位浮层 / 深浅色板等场景，现代 Web 平台（scroll-driven animations / `<dialog>` / Popover API / `light-dark()`）已可原生达成且带回退，不再引库；高级视觉动效仍走 React Bits。新增 12 条原生指引（modern-platform.md）+ 遗留模式扫描器 legacy-scan.mjs（交付前自查 8 条确定性遗留模式），verify 升至 64 项检查。
 >
 > **v1.7.3 选型决策层重构**：选型从"按组件类别罗列"改为 **站点类型 → 视觉约束 → 组件** 的三段式决策。217 个组件全部进入候选池（v1.6 时代只有 54/217 = 25% 有推荐路径），一条命令跑完全部一致性校验：
 > ```bash
 > node scripts/select.mjs --site-type saas --background-mode 深底 --mobile-ratio 高
-> node scripts/verify.mjs   # 52 项检查，exit 0
+> node scripts/verify.mjs   # 64 项检查，exit 0
 > ```
 
 ---
@@ -70,10 +70,11 @@ AI 写 React 动效页面有三大高频翻车点：
 | 🎨 背景主题推荐 | 按网站主题做三步分析（领域词 + 氛围词 + 约束），给出候选背景与具体配色参数 |
 | 🖱️ 交互层推荐 | 按钮 / 转场 / 微交互按「点缀 / 强调 / 沉浸」三级强度组合，杜绝动效堆砌 |
 | 📐 排版设计规范 | 设计契约 → 骨架配方（区间 + 触发条件，如作品集头部 40~70vh）→ 8pt 间距 → 字阶 1.25 倍率 → 60-30-10 配色 |
+| 🧱 分区背景带 | 每个主要区块独立全宽背景带 + 适配动效（计数 / 卡堆 / 滚动生长 / 指针光斑），附区块→背景→动效映射表与全页背景组件预算 |
 | 📖 组件用法速查 | 高频 31 组件的 import 路径、必需 props、依赖包与实测踩坑 |
 | ✅ 双档可视化验证 | 1920×1080 + 1366×768 双分辨率截图自查，动画与排版一并确认 |
 | 🔄 目录自动同步 | 一条命令从官方数据源更新组件目录与依赖，并校验全部引用的组件 ID 是否失效 |
-| 🔍 一键一致性校验 | `node scripts/verify.mjs` 跑完 7 大类 46 项检查（数据层 / 词表 / 属性表 / 选型脚本 / 骨架 / 触屏清单），全绿才交付 |
+| 🔍 一键一致性校验 | `node scripts/verify.mjs` 跑完 10 大类 64 项检查（数据层 / 词表 / 属性表 / 选型脚本 / 骨架 / 触屏清单 / 遗留扫描 / 执行契约 / 原生优先 / 分区背景带），全绿才交付 |
 
 ## 安装
 

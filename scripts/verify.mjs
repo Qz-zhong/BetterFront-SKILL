@@ -353,6 +353,15 @@ check("SKILL.md 版本为 1.8.0 且知识库表含 modern-platform",
 const readmeZh = readFileSync(path.join(ROOT, "README.md"), "utf8");
 check("README.md 版本段含 v1.8.0（原生平台优先）", readmeZh.includes("1.8.0"));
 
+// ============ 10. 整页视觉完整性：分区背景带（v1.8.0 实战沉淀）============
+section("10. 整页分区背景带：规则 / 映射表 / 交付自查三处锚点");
+check("layout-guide.md 含 §2.1 分区背景带规则", /^### 2\.1 分区背景带/m.test(layoutText));
+check("layout-guide.md 含区块 → 背景带 → 动效映射表",
+  layoutText.includes("区块 → 背景带 → 动效") && layoutText.includes("SpotlightCard"));
+check("pitfalls.md 含第 10 节整页视觉完整性", /^## 10\. 整页视觉完整性/m.test(pitfallsText));
+check("SKILL.md Step 3 含分区背景带强制规则", skillText.includes("分区背景带（强制）"));
+check("SKILL.md Step 5 含分区背景带交付自查", /分区背景带自查/.test(skillText));
+
 // ============ 汇总 ============
 console.log(`\n${"=".repeat(56)}`);
 console.log(`verify 结果：${pass} 通过 / ${fail} 失败`);
@@ -361,7 +370,7 @@ if (fail > 0) {
   for (const f of failures) console.log(`  - ${f}`);
   process.exit(1);
 } else {
-  console.log("✅ 全部 7 项验收 + 执行顺序契约 + 原生优先契约通过 (exit 0)");
+  console.log("✅ 全部 7 项验收 + 执行顺序契约 + 原生优先契约 + 分区背景带契约通过 (exit 0)");
   console.log(`   select 覆盖统计：${unionIds.size}/217 去重候选；` +
     CATS.map((c) => `${c} ${catCount[c].size}`).join(" / "));
 }

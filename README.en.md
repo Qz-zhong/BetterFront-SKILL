@@ -10,12 +10,12 @@
 
 **Unofficial community skill** — built on the open [Agent Skills](https://agentskills.io) spec. Makes your AI coding agent work like a senior engineer who knows every one of the 217 animated components in React Bits.
 
-> **v1.8.0 — native-platform-first gate (inspired by [Modern Web Guidance](https://github.com/GoogleChrome/modern-web-guidance)).** The decision chain now asks first whether a modern web platform feature can achieve the intent natively — simple scroll reveals / uniform marquees / modals / anchored overlays / light-dark palettes (scroll-driven animations, `<dialog>`, Popover API, `light-dark()`) ship with `@supports` fallbacks instead of new libraries; high-end visual effects still route to React Bits. Ships with 12 native guides (`modern-platform.md`) and a legacy-pattern scanner `legacy-scan.mjs` (8 deterministic rules, human-verified before edits). verify now runs 52 checks.
+> **v1.8.0 — native-platform-first gate (inspired by [Modern Web Guidance](https://github.com/GoogleChrome/modern-web-guidance)).** The decision chain now asks first whether a modern web platform feature can achieve the intent natively — simple scroll reveals / uniform marquees / modals / anchored overlays / light-dark palettes (scroll-driven animations, `<dialog>`, Popover API, `light-dark()`) ship with `@supports` fallbacks instead of new libraries; high-end visual effects still route to React Bits. Ships with 12 native guides (`modern-platform.md`) and a legacy-pattern scanner `legacy-scan.mjs` (8 deterministic rules, human-verified before edits). verify now runs 64 checks.
 >
 > **v1.7.0 — rebuilt decision layer.** Selection moved from "list components by category" to a three-stage **site type → visual constraint → component** pipeline. All 217 components now enter the candidate pool (in v1.6 only 54/217 = 25% had any recommendation path). One command runs all consistency checks:
 > ```bash
 > node scripts/select.mjs --site-type saas --background-mode dark --mobile-ratio high
-> node scripts/verify.mjs   # 52 checks, exit 0
+> node scripts/verify.mjs   # 64 checks, exit 0
 > ```
 
 **中文文档**：[README.md](README.md)
@@ -70,10 +70,11 @@ Open [demo/comparison/before.html](demo/comparison/before.html) and [demo/compar
 | 🎨 Background theme matching | Three-step theme analysis (domain + mood + constraints) → candidate backgrounds with concrete color parameters |
 | 🖱️ Interaction selection | Buttons / transitions / micro-interactions bundled at three intensity tiers (subtle / accent / immersive) |
 | 📐 Layout discipline | Design contract → skeleton recipes as **ranges + trigger conditions** (e.g. portfolio header 40–70vh) → 8pt spacing → 1.25 type scale → 60-30-10 color |
+| 🧱 Section bands | Every major block gets its own full-bleed background band plus a content-matched effect (counters / card stack / scroll-drawn line / pointer spotlight), with a block→background→effect map and a page-wide background budget |
 | 📖 Component usage notes | Import paths, required props, deps and tested gotchas for the 31 most-used components |
 | ✅ Dual-resolution verification | 1920×1080 + 1366×768 screenshot self-check for both motion and layout |
 | 🔄 Auto-syncing catalog | One command refreshes the component catalog and deps, and flags any stale component references |
-| 🔍 One-command consistency check | `node scripts/verify.mjs` runs all 52 checks across 9 groups (data layer / vocabulary / attribute pool / selector / skeletons / touch list / legacy scan / execution contract / native-first gate) — green means shippable |
+| 🔍 One-command consistency check | `node scripts/verify.mjs` runs all 64 checks across 10 groups (data layer / vocabulary / attribute pool / selector / skeletons / touch list / legacy scan / execution contract / native-first gate / section bands) — green means shippable |
 | 🌿 Native-platform-first gate | 12 modern-platform guides + a React Bits→native mapping table: simple reveals, modals, overlays and light-dark palettes ship as platform-native code with fallbacks; `legacy-scan.mjs` flags 8 deterministic legacy patterns before delivery |
 
 ## Install

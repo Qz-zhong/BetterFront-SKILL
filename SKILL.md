@@ -144,12 +144,14 @@ npx jsrepo@latest add https://reactbits.dev/r/<CliId>-<VARIANT>
    不要预先判断"能不能截图"；仅在真的失败（无浏览器工具 / 报缺 chromium / server 起不来）时才切兜底：给用户 `npm run dev` 指引与预期效果清单，请用户确认（见第 7 节）
 4. **不生效排查顺序**：import 路径 → 必需 props → 依赖版本 → 对照官方源码逐行核对
 5. **遗留模式自查（v1.8.0，交付前）**：`node scripts/legacy-scan.mjs <项目>/src` —— 检出的**候选**逐条按 keepWhen/dropWhen 核验后修复（原生替代写法见 modern-platform.md）；仅静态确定性规则，不替代人工审查
+6. **分区背景带自查（交付前）**：滚到第二屏以后逐带检查 —— 是否仍是全宽背景带、该带是否有适配动效、背景组件是否超全页预算（≤2 个画布 / WebGL）；判定标准见 layout-guide §2.1 与 pitfalls 第 10 节
 
 ## 3. 整页构建模式
 
 免费库**没有页面级 blocks**（页面块/模板属于付费的 React Bits Pro），整页 = 免费组件分层组合：
 
-- 分层预算：背景 ×1 + 主视觉 ×1~2 + 内容区 ×2~3 + 微交互点缀，**不要超配**
+- 分层预算：主背景 ×1 + 主视觉 ×1~2 + 内容区 ×2~3 + 微交互点缀，**不要超配**
+- **分区背景带（强制）**：每个主要区块都要有自己的全宽背景带（底色 / 渐变 / 纹理 / 组件背景）+ 一种适配该区内容的动效；不得全页共用一张底色、只在 Hero 加背景（见 layout-guide §2.1）
 - 一屏最多 1 个焦点动效，其余做氛围
 - **分类覆盖度自查**：整页交付应体现 React Bits 五大类中的至少 4 类（背景 / 文本动画 / 动画 / 组件 / 微交互）—— 只换背景不叫完整交付，避免"背景高级了但正文还是静态半成品"
 - 优先套用 `references/recipes.md` 中现成配方（SaaS 落地页 / 个人作品集 / 产品发布页）
@@ -212,7 +214,7 @@ MIT + Commons Clause：组件可自由用于个人与商业项目，但**不得�
 
 ## 变更记录
 
-- **v1.8.0（2026-11-17）**：**原生平台优先分流（参考 [Modern Web Guidance](https://github.com/GoogleChrome/modern-web-guidance)）** —— 借鉴 Chrome/Edge/Firefox/MDN 联合维护的 MWG 技能体系「Agent 默认生成遗留模式，应优先使用现代平台能力」的核心论点，为选型决策链增加前置分流层：① 新增 `references/modern-platform.md`（12 个高价值现代特性精简指引：scroll-driven animations / View Transitions / `<dialog>`+`@starting-style` / Popover API / anchor positioning / `light-dark()`+oklch / `text-box` / container queries / 滚动质感套件 / `content-visibility` / 交互媒体查询 / Baseline 回退策略，含 React 框架适配注意）+ React Bits→原生替代映射表（命中全部替换判据才替换，不满足一律回组件）；② 新增 `scripts/legacy-scan.mjs`（8 条确定性遗留模式规则，每条带 keepWhen/dropWhen，输出仅候选需人工核验），并入 Step 5 交付前自查；③ SKILL.md 新增 Step 1.5「原生优先分流」与红线追加（`@supports` 回退强制、模态/浮层原生优先），第 7 节加速层表新增 MWG 官方 CLI 行（离线时内置指引兜底）；④ pitfalls.md 新增第 8 节遗留模式黑名单，layout-guide 色板句补 oklch/light-dark()；⑤ verify.mjs 新增第 9 组断言（含 legacy-scan fixture 自测），46 → 52 项。React Bits 仍是高级动效主力——原生层只承接平台已内置的简单场景，定位是分流器而非第二组件库
+- **v1.8.0（2026-11-17）**：**原生平台优先分流（参考 [Modern Web Guidance](https://github.com/GoogleChrome/modern-web-guidance)）** —— 借鉴 Chrome/Edge/Firefox/MDN 联合维护的 MWG 技能体系「Agent 默认生成遗留模式，应优先使用现代平台能力」的核心论点，为选型决策链增加前置分流层：① 新增 `references/modern-platform.md`（12 个高价值现代特性精简指引：scroll-driven animations / View Transitions / `<dialog>`+`@starting-style` / Popover API / anchor positioning / `light-dark()`+oklch / `text-box` / container queries / 滚动质感套件 / `content-visibility` / 交互媒体查询 / Baseline 回退策略，含 React 框架适配注意）+ React Bits→原生替代映射表（命中全部替换判据才替换，不满足一律回组件）；② 新增 `scripts/legacy-scan.mjs`（8 条确定性遗留模式规则，每条带 keepWhen/dropWhen，输出仅候选需人工核验），并入 Step 5 交付前自查；③ SKILL.md 新增 Step 1.5「原生优先分流」与红线追加（`@supports` 回退强制、模态/浮层原生优先），第 7 节加速层表新增 MWG 官方 CLI 行（离线时内置指引兜底）；④ pitfalls.md 新增第 8 节遗留模式黑名单，layout-guide 色板句补 oklch/light-dark()；⑤ verify.mjs 新增第 9 组断言（含 legacy-scan fixture 自测）与第 10 组分区背景带契约，46 → 64 项；⑥ 整页构建新增「分区背景带」硬规则（layout-guide §2.1 + pitfalls 第 10 节 + Step 5 第 6 条自查）：每个主要区块独立全宽背景 + 适配动效，并按全页预算控制背景组件（≤2 画布 / WebGL ≤2），杜绝「全页一张底、只有 Hero 有背景」的半成品页。React Bits 仍是高级动效主力——原生层只承接平台已内置的简单场景，定位是分流器而非第二组件库
 - **v1.7.3（2026-10-30）**：**执行顺序改为「先试最优 → 撞墙再退」** —— 原第 7 节是「缺失 → 降级做法」静态对照表，Step 5 用的是「先判断能不能截图、再决定怎么验证」的预探测（LBYL）句式，会导致 Agent 因猜错环境而白白放弃更优路径。改为：① 第 7 节表格扩为三段式「优先执行 / 失败信号 / 兜底路径」，每项给出真实失败信号（`node: not found`、缺 chromium、fetch 超时等），不再依赖猜测；② 明确 EAFP 铁律——不要预先探测运行时环境（`node` 在但 <18、npx 在但离线、浏览器工具在但没装 chromium，预探测都会误判），例外是项目配置类（package.json / components.json / tsconfig.json）必须主动读，那是获取信息不是探测；③ Step 2 / Step 5 就地内联兜底锚点，兜底指引不再只存在于第 7 节；Step 4 本就是 A→B→C 优先级链，保持不变；④ verify.mjs 新增第 8 组「执行顺序契约」7 项断言（三段式表头 / 四项能力齐全 / 先试后退铁律 / 三步各含兜底锚点 / Step 5 不再出现预探测句式），46 项全绿
 - **v1.7.2（2026-10-30）**：**澄清「降级」语义** —— 第 7 节与中英 README 明确区分两个正交维度：决策知识是**零依赖内核**（静态文件，任何能读文件的 Agent 都能跑完五步，无需 Node/MCP/网络/私有 API），Node 脚本 / MCP 通道 / 浏览器自动化 / 网络四项只是**加速层**，缺失时换备选路径且**选型结论一致**；补充「降级 = 换路径，不是砍功能；宿主运行时环境与 Agent 品牌正交」的说明，消除「无法跨 Agent 通用」的误读
 - **v1.7.1（2026-10-30）**：**跨 Agent 通用性** —— 新增第 7 节「环境降级」：明确 Node 缺失（手工查 components.yaml）/ MCP 缺失（CLI 兜底）/ 浏览器自动化缺失（指引 + 预期效果清单）/ 离线（217 组件快照内置）四种情况下的降级路径，并要求在回复中显式说明降级原因；README 安装地址占位符 `github.com/<you>/...` 修正为真实仓库 `github.com/Qz-zhong/BetterFront-SKILL`，中英双语新增「跨 Agent 通用性」对照表。技能不含任何平台专有命令或私有 API 依赖（已全量扫描确认）
